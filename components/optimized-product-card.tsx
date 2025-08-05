@@ -36,7 +36,7 @@ export default function OptimizedProductCard({ product, onAddToCart }: Optimized
     >
       {/* Discount Badge */}
       {product.discount > 0 && (
-        <div className="absolute top-3 left-3 z-10 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+        <div className="absolute top-2 md:top-3 left-2 md:left-3 z-10 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">
           -{product.discount}%
         </div>
       )}
@@ -60,12 +60,15 @@ export default function OptimizedProductCard({ product, onAddToCart }: Optimized
       </div>
 
       {/* Content */}
-      <div className="p-4">
+      <div className="p-3 md:p-4">
         <div className="flex items-start justify-between mb-2">
-          <h3 className="font-semibold text-sm line-clamp-2 text-gray-900 dark:text-white">
+          <h3 className="font-semibold text-sm line-clamp-2 text-gray-900 dark:text-white flex-1 mr-2">
             {product.name}
           </h3>
-          <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors">
+          <button 
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors touch-manipulation"
+            style={{ minHeight: '44px', minWidth: '44px' }} // Touch-friendly minimum size
+          >
             <Heart className="w-4 h-4 text-gray-400 hover:text-red-500" />
           </button>
         </div>
@@ -93,7 +96,8 @@ export default function OptimizedProductCard({ product, onAddToCart }: Optimized
         <button
           onClick={() => onAddToCart(product)}
           disabled={!product.inStock}
-          className="w-full bg-[#F7DD0F] text-black py-2 px-4 rounded-lg font-medium hover:bg-[#F7DD0F]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          className="w-full bg-[#F7DD0F] text-black py-3 md:py-2 px-4 rounded-lg font-medium hover:bg-[#F7DD0F]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 touch-manipulation"
+          style={{ minHeight: '48px' }} // Touch-friendly minimum height
         >
           <ShoppingBag className="w-4 h-4" />
           {product.inStock ? 'Add to Cart' : 'Out of Stock'}

@@ -4,6 +4,14 @@ import { useEffect } from "react"
 
 export default function CursorTracker() {
   useEffect(() => {
+    // Check if device supports touch (mobile/tablet)
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0
+    
+    // Don't create custom cursor on touch devices
+    if (isTouchDevice) {
+      return
+    }
+
     const cursor = document.createElement("div")
     cursor.className = "custom-cursor"
     cursor.style.cssText = `

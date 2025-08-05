@@ -1,382 +1,130 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-/* Import only essential custom fonts */
-@font-face {
-  font-family: 'Street Wars';
-  src: url('/fonts/Street Wars Demo.otf') format('opentype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
+/* Custom scrollbar hiding for mobile */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Safari and Chrome */
 }
 
-@font-face {
-  font-family: 'Most Wasted';
-  src: url('/fonts/Mostwasted.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
+/* Touch-friendly styles */
+.touch-manipulation {
+  touch-action: manipulation;
 }
 
-@font-face {
-  font-family: 'Brick';
-  src: url('/fonts/Brick.otf') format('opentype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Beauty Glitch';
-  src: url('/fonts/Beauty Glitch Demo.otf') format('opentype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Futurest Cosmo';
-  src: url('/fonts/Futurest Cosmo.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'SD CyberPunk City';
-  src: url('/fonts/SDCyberPunkCityDemo.otf') format('opentype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Vorcas';
-  src: url('/fonts/Vorcas-Regular.otf') format('opentype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'DotZero Basic';
-  src: url('/fonts/DotZeroBasic.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Demon Say Hi';
-  src: url('/fonts/Demon Say Hi.otf') format('opentype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-@custom-variant dark (&:is(.dark *));
-
-:root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-}
-
-.dark {
-  --background: #1a1a1a;
-  --foreground: #ffffff;
-  --card: #1a1a1a;
-  --card-foreground: #ffffff;
-  --popover: #1a1a1a;
-  --popover-foreground: #ffffff;
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: #2a2a2a;
-  --secondary-foreground: #ffffff;
-  --muted: #2a2a2a;
-  --muted-foreground: #b3b3b3;
-  --accent: #2a2a2a;
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: #2a2a2a;
-  --input: #2a2a2a;
-  --ring: oklch(0.439 0 0);
-  --chart-1: oklch(0.9 0.2 85);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: #1a1a1a;
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: oklch(0.9 0.2 85);
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #2a2a2a;
-  --sidebar-accent-foreground: #ffffff;
-  --sidebar-border: #2a2a2a;
-  --sidebar-ring: oklch(0.439 0 0);
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
-}
-
-/* Hide Scrollbars */
-::-webkit-scrollbar {
-  display: none;
-}
-
-html {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-  scroll-behavior: smooth;
-}
-
-body {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-  cursor: none;
-}
-
-/* Force lighter black background for dark mode */
-.dark body {
-  background-color: #1a1a1a !important;
-}
-
-.dark {
-  background-color: #1a1a1a !important;
-}
-
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-  }
-  body {
-    @apply bg-background text-foreground;
+/* Custom cursor styles - only on desktop */
+@media (hover: hover) and (pointer: fine) {
+  .cursor-hover:hover {
+    cursor: pointer;
   }
 }
 
-/* Custom Yellow Circle Cursor */
-body::after {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 20px;
-  height: 20px;
-  background: #f7dd0f;
-  border-radius: 50%;
+/* Mobile-specific optimizations */
+@media (max-width: 768px) {
+  /* Disable hover effects on mobile */
+  .group:hover .group-hover\:scale-110 {
+    transform: none;
+  }
+  
+  .group:hover .group-hover\:opacity-100 {
+    opacity: 1;
+  }
+  
+  .group:hover .group-hover\:translate-y-0 {
+    transform: none;
+  }
+}
+
+/* Jakarta font classes */
+.jakarta-light {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 300;
+}
+
+.jakarta-regular {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 400;
+}
+
+.jakarta-medium {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 500;
+}
+
+.jakarta-semibold {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 600;
+}
+
+.jakarta-bold {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+}
+
+.jakarta-extrabold {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 800;
+}
+
+.jakarta-subtitle {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 500;
+  font-style: italic;
+}
+
+/* Custom cursor styles */
+.custom-cursor {
   pointer-events: none;
   z-index: 9999;
-  transform: translate(-50%, -50%);
-  transition: transform 0.1s ease-out, scale 0.2s ease;
-  box-shadow: 0 0 15px rgba(247, 221, 15, 0.6), 0 0 30px rgba(247, 221, 15, 0.3);
 }
 
-/* Cursor hover effects for interactive elements */
-button:hover ~ body::after,
-a:hover ~ body::after,
-.cursor-hover:hover ~ body::after {
-  transform: translate(-50%, -50%) scale(1.5);
-  box-shadow: 0 0 25px rgba(247, 221, 15, 0.8), 0 0 50px rgba(247, 221, 15, 0.4);
+/* DopeTech card styles */
+.dopetech-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
 }
 
-/* Make sure interactive elements show pointer behavior */
-button,
-a,
-.cursor-pointer {
-  cursor: none !important;
+.dopetech-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  border-color: rgba(247, 221, 15, 0.3);
 }
 
-@layer utilities {
-  /* Logo Theme Inversion */
-  .logo-adaptive {
-    transition: filter 0.3s ease;
-    filter: invert(1) brightness(1);
-  }
-
-  .dark .logo-adaptive {
-    filter: invert(0) brightness(1);
-  }
-
-  /* Plus Jakarta Sans Typography */
-  .jakarta-title {
-    font-weight: 700;
-    letter-spacing: -0.025em;
-    line-height: 1.2;
-  }
-
-  .jakarta-subtitle {
-    font-weight: 600;
-    letter-spacing: -0.015em;
-    line-height: 1.4;
-  }
-
-  .jakarta-body {
-    font-weight: 500;
-    letter-spacing: -0.01em;
-    line-height: 1.5;
-  }
-
-  .jakarta-light {
-    font-weight: 400;
-    letter-spacing: -0.008em;
-    line-height: 1.6;
-  }
-
-  /* DopeTech Cards */
-  .dopetech-card {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    border-radius: 18px;
-    border: 2px solid rgba(247, 221, 15, 0.2);
-    transition: all 0.3s ease;
-  }
-
-  .dark .dopetech-card {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(247, 221, 15, 0.3);
-  }
-
-  .dopetech-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 40px rgba(247, 221, 15, 0.2);
-    border-color: rgba(247, 221, 15, 0.4);
-  }
-
-  /* DopeTech Navigation */
-  .dopetech-nav {
-    backdrop-filter: blur(20px);
-    background: rgba(255, 255, 255, 0.95);
-    border-bottom: 1px solid rgba(247, 221, 15, 0.2);
-    transition: all 0.3s ease;
-  }
-
-  .dark .dopetech-nav {
-    background: rgba(0, 0, 0, 0.95);
-    border-bottom-color: rgba(247, 221, 15, 0.3);
-  }
-
-  /* Navigation Icon Buttons */
-  .nav-icon-button {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(247, 221, 15, 0.2);
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: none !important;
-    transition: all 0.3s ease;
-  }
-
-  .nav-icon-button:hover {
-    background: rgba(247, 221, 15, 0.1);
-    border-color: rgba(247, 221, 15, 0.4);
-    transform: scale(1.05);
-    box-shadow: 0 0 15px rgba(247, 221, 15, 0.3);
-  }
-
-  .dark .nav-icon-button {
-    background: rgba(0, 0, 0, 0.3);
-    border-color: rgba(247, 221, 15, 0.3);
-  }
-
-  .dark .nav-icon-button:hover {
-    background: rgba(247, 221, 15, 0.2);
-    border-color: rgba(247, 221, 15, 0.5);
-    box-shadow: 0 0 15px rgba(247, 221, 15, 0.4);
-  }
-
-  /* Golden Glow Effect */
-  .golden-glow {
-    text-shadow: 0 0 10px rgba(247, 221, 15, 0.5);
-  }
-
-  .golden-glow-strong {
-    text-shadow: 0 0 20px rgba(247, 221, 15, 0.8), 0 0 40px rgba(247, 221, 15, 0.4);
-  }
+/* Navigation styles */
+.dopetech-nav {
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Animations */
-@keyframes fade-in-up {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.nav-icon-button {
+  transition: all 0.2s ease;
+  border-radius: 8px;
 }
 
+.nav-icon-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.05);
+}
+
+/* Logo adaptive styles */
+.logo-adaptive {
+  filter: drop-shadow(0 0 10px rgba(247, 221, 15, 0.5));
+  transition: all 0.3s ease;
+}
+
+.logo-adaptive:hover {
+  filter: drop-shadow(0 0 20px rgba(247, 221, 15, 0.8));
+  transform: scale(1.1);
+}
+
+/* Marquee animation */
 @keyframes marquee {
   0% {
     transform: translateX(0);
@@ -386,31 +134,53 @@ a,
   }
 }
 
-.fade-in-up {
-  animation: fade-in-up 0.8s ease-out;
-}
-
 .animate-marquee {
-  animation: marquee 15s linear infinite;
+  animation: marquee 30s linear infinite;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-  .apple-hero {
-    padding: 100px 0;
-  }
+/* Line clamp utilities */
+.line-clamp-1 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+}
 
-  .apple-section {
-    padding: 80px 0;
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+/* Responsive text utilities */
+@media (max-width: 640px) {
+  .text-responsive-xs {
+    font-size: 0.75rem;
   }
 }
 
-@media (max-width: 480px) {
-  .apple-hero {
-    padding: 80px 0;
+@media (min-width: 641px) and (max-width: 768px) {
+  .text-responsive-sm {
+    font-size: 0.875rem;
   }
+}
 
-  .apple-section {
-    padding: 60px 0;
+@media (min-width: 769px) and (max-width: 1024px) {
+  .text-responsive-md {
+    font-size: 1rem;
+  }
+}
+
+@media (min-width: 1025px) {
+  .text-responsive-lg {
+    font-size: 1.125rem;
   }
 }
