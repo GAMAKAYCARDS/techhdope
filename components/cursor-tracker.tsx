@@ -4,11 +4,20 @@ import { useEffect } from "react"
 
 export default function CursorTracker() {
   useEffect(() => {
-    // Check if device supports touch (mobile/tablet)
-    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0
+    // Enhanced mobile detection
+    const isTouchDevice = () => {
+      return (
+        'ontouchstart' in window ||
+        navigator.maxTouchPoints > 0 ||
+        navigator.msMaxTouchPoints > 0 ||
+        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+      )
+    }
     
     // Don't create custom cursor on touch devices
-    if (isTouchDevice) {
+    if (isTouchDevice()) {
+      // Hide cursor on mobile devices
+      document.body.style.cursor = 'none'
       return
     }
 
@@ -63,6 +72,8 @@ export default function CursorTracker() {
       if (cursor.parentNode) {
         cursor.parentNode.removeChild(cursor)
       }
+      // Restore cursor on cleanup
+      document.body.style.cursor = ''
     }
   }, [])
 
