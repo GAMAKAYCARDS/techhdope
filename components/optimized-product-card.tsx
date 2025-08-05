@@ -30,13 +30,14 @@ export default function OptimizedProductCard({ product, onAddToCart }: Optimized
 
   return (
     <div 
-      className="group relative bg-white dark:bg-[#1a1a1a] rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden cursor-pointer"
+      className="group relative bg-white dark:bg-[#1a1a1a] rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden cursor-pointer premium-card hover-lift animate-fade-in-up"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      style={{ animationDelay: `${product.id * 0.1}s` }}
     >
       {/* Discount Badge */}
       {product.discount > 0 && (
-        <div className="absolute top-2 md:top-3 left-2 md:left-3 z-10 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold">
+        <div className="absolute top-2 md:top-3 left-2 md:left-3 z-10 bg-red-500 text-white px-2 py-1 rounded-full text-xs font-bold animate-scale-in">
           -{product.discount}%
         </div>
       )}
@@ -44,13 +45,13 @@ export default function OptimizedProductCard({ product, onAddToCart }: Optimized
       {/* Image Container */}
       <div className="relative aspect-square overflow-hidden bg-gray-100 dark:bg-gray-800">
         {!imageLoaded && (
-          <div className="absolute inset-0 bg-gray-200 dark:bg-gray-700 animate-pulse" />
+          <div className="absolute inset-0 bg-gray-200 dark:bg-gray-700 animate-pulse animate-shimmer" />
         )}
         <Image
           src={product.image}
           alt={product.name}
           fill
-          className={`object-cover transition-transform duration-300 ${
+          className={`object-cover transition-transform duration-500 premium-transition ${
             isHovered ? 'scale-110' : 'scale-100'
           } ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
           onLoad={() => setImageLoaded(true)}
@@ -66,7 +67,7 @@ export default function OptimizedProductCard({ product, onAddToCart }: Optimized
             {product.name}
           </h3>
           <button 
-            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors touch-manipulation"
+            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors touch-manipulation hover-scale hover-glow premium-transition"
             style={{ minHeight: '44px', minWidth: '44px' }} // Touch-friendly minimum size
           >
             <Heart className="w-4 h-4 text-gray-400 hover:text-red-500" />
@@ -96,7 +97,7 @@ export default function OptimizedProductCard({ product, onAddToCart }: Optimized
         <button
           onClick={() => onAddToCart(product)}
           disabled={!product.inStock}
-          className="w-full bg-[#F7DD0F] text-black py-3 md:py-2 px-4 rounded-lg font-medium hover:bg-[#F7DD0F]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 touch-manipulation"
+          className="w-full bg-[#F7DD0F] text-black py-3 md:py-2 px-4 rounded-lg font-medium hover:bg-[#F7DD0F]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 touch-manipulation premium-button hover-lift"
           style={{ minHeight: '48px' }} // Touch-friendly minimum height
         >
           <ShoppingBag className="w-4 h-4" />

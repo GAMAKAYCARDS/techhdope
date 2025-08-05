@@ -187,16 +187,16 @@ export default function DopeTechEcommerce() {
 
       {/* Cart Sidebar */}
       {isCartOpen && (
-        <div className="fixed inset-0 z-50 flex">
+        <div className="fixed inset-0 z-50 flex animate-fade-in-right">
           <div className="fixed inset-0 bg-black/50" onClick={() => setIsCartOpen(false)} />
-          <div className="relative w-full max-w-sm md:max-w-md bg-white dark:bg-gray-900 shadow-xl">
+          <div className="relative w-full max-w-sm md:max-w-md bg-white dark:bg-gray-900 shadow-xl animate-slide-in-up">
             <div className="flex flex-col h-full">
               {/* Cart Header */}
               <div className="flex items-center justify-between p-4 md:p-6 border-b border-gray-200 dark:border-gray-700">
                 <h2 className="text-lg md:text-xl font-semibold text-gray-900 dark:text-white">Shopping Cart</h2>
                 <button
                   onClick={() => setIsCartOpen(false)}
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors touch-manipulation"
+                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors touch-manipulation hover-scale premium-transition"
                   style={{ minHeight: '44px', minWidth: '44px' }} // Touch-friendly minimum size
                 >
                   <svg className="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -208,7 +208,7 @@ export default function DopeTechEcommerce() {
               {/* Cart Items */}
               <div className="flex-1 overflow-y-auto p-4 md:p-6">
                 {cart.length === 0 ? (
-                  <div className="text-center py-12">
+                  <div className="text-center py-12 animate-fade-in-up">
                     <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                     </svg>
@@ -216,8 +216,12 @@ export default function DopeTechEcommerce() {
                   </div>
                 ) : (
                   <div className="space-y-3 md:space-y-4">
-                    {cart.map((item) => (
-                      <div key={item.id} className="flex items-center space-x-3 md:space-x-4 p-3 md:p-4 bg-gray-50 dark:bg-[#2a2a2a] rounded-lg">
+                    {cart.map((item, index) => (
+                      <div 
+                        key={item.id} 
+                        className="flex items-center space-x-3 md:space-x-4 p-3 md:p-4 bg-gray-50 dark:bg-[#2a2a2a] rounded-lg animate-fade-in-up premium-transition hover-lift"
+                        style={{ animationDelay: `${index * 0.1}s` }}
+                      >
                         <img
                           src={item.image}
                           alt={item.name}
@@ -230,7 +234,7 @@ export default function DopeTechEcommerce() {
                         <div className="flex items-center space-x-2">
                           <button
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                            className="p-2 hover:bg-gray-200 dark:hover:bg-[#2a2a2a] rounded transition-colors touch-manipulation"
+                            className="p-2 hover:bg-gray-200 dark:hover:bg-[#2a2a2a] rounded transition-colors touch-manipulation hover-scale premium-transition"
                             style={{ minHeight: '44px', minWidth: '44px' }} // Touch-friendly minimum size
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -240,7 +244,7 @@ export default function DopeTechEcommerce() {
                           <span className="w-8 text-center text-sm md:text-base">{item.quantity}</span>
                           <button
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            className="p-2 hover:bg-gray-200 dark:hover:bg-[#2a2a2a] rounded transition-colors touch-manipulation"
+                            className="p-2 hover:bg-gray-200 dark:hover:bg-[#2a2a2a] rounded transition-colors touch-manipulation hover-scale premium-transition"
                             style={{ minHeight: '44px', minWidth: '44px' }} // Touch-friendly minimum size
                           >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -250,7 +254,7 @@ export default function DopeTechEcommerce() {
                         </div>
                         <button
                           onClick={() => removeFromCart(item.id)}
-                          className="p-2 hover:bg-red-100 dark:hover:bg-red-900/20 rounded text-red-500 transition-colors touch-manipulation"
+                          className="p-2 hover:bg-red-100 dark:hover:bg-red-900/20 rounded text-red-500 transition-colors touch-manipulation hover-scale premium-transition"
                           style={{ minHeight: '44px', minWidth: '44px' }} // Touch-friendly minimum size
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -265,13 +269,13 @@ export default function DopeTechEcommerce() {
 
               {/* Cart Footer */}
               {cart.length > 0 && (
-                <div className="border-t border-gray-200 dark:border-gray-700 p-4 md:p-6">
+                <div className="border-t border-gray-200 dark:border-gray-700 p-4 md:p-6 animate-fade-in-up">
                   <div className="flex justify-between items-center mb-4">
                     <span className="text-base md:text-lg font-semibold">Total:</span>
                     <span className="text-xl md:text-2xl font-bold text-[#F7DD0F]">Rs {cartTotal.toFixed(2)}</span>
                   </div>
                   <button 
-                    className="w-full bg-[#F7DD0F] text-black py-3 md:py-3 px-4 rounded-lg font-medium hover:bg-[#F7DD0F]/90 transition-colors touch-manipulation"
+                    className="w-full bg-[#F7DD0F] text-black py-3 md:py-3 px-4 rounded-lg font-medium hover:bg-[#F7DD0F]/90 transition-colors touch-manipulation premium-button hover-lift"
                     style={{ minHeight: '48px' }} // Touch-friendly minimum height
                   >
                     Checkout
@@ -284,22 +288,22 @@ export default function DopeTechEcommerce() {
       )}
 
       {/* Footer */}
-      <footer className="bg-black py-12 md:py-16 border-t-2 border-[#F7DD0F]">
+      <footer className="bg-black py-12 md:py-16 border-t-2 border-[#F7DD0F] animate-fade-in-up">
         <div className="max-w-7xl mx-auto px-4 md:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-3 mb-6 md:mb-0">
-              <img src="/images/dopetech-logo-new.png" alt="DopeTech" className="w-8 h-8 md:w-10 md:h-10 logo-adaptive" />
+              <img src="/images/dopetech-logo-new.png" alt="DopeTech" className="w-8 h-8 md:w-10 md:h-10 logo-adaptive hover-scale" />
               <span className="text-xs md:text-sm text-white jakarta-light">© 2025 DopeTech Nepal. All rights reserved.</span>
             </div>
 
             <div className="flex space-x-6 md:space-x-8">
-              <a href="#" className="text-xs md:text-sm text-gray-400 hover:text-[#F7DD0F] transition-colors cursor-hover jakarta-light">
+              <a href="#" className="text-xs md:text-sm text-gray-400 hover:text-[#F7DD0F] transition-colors cursor-hover jakarta-light premium-transition hover-scale">
                 Privacy Policy
               </a>
-              <a href="#" className="text-xs md:text-sm text-gray-400 hover:text-[#F7DD0F] transition-colors cursor-hover jakarta-light">
+              <a href="#" className="text-xs md:text-sm text-gray-400 hover:text-[#F7DD0F] transition-colors cursor-hover jakarta-light premium-transition hover-scale">
                 Terms of Use
               </a>
-              <a href="#" className="text-xs md:text-sm text-gray-400 hover:text-[#F7DD0F] transition-colors cursor-hover jakarta-light">
+              <a href="#" className="text-xs md:text-sm text-gray-400 hover:text-[#F7DD0F] transition-colors cursor-hover jakarta-light premium-transition hover-scale">
                 Support
               </a>
             </div>
