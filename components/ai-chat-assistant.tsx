@@ -210,7 +210,7 @@ export default function AIChatAssistant({ products, onAddToCart }: AIChatAssista
       {/* Mobile Chat Toggle Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 z-50 bg-[#F7DD0F] text-black p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 touch-manipulation"
+        className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 bg-[#F7DD0F] text-black p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 touch-manipulation"
         style={{ minHeight: '56px', minWidth: '56px' }}
         aria-label="Open AI Chat Assistant"
       >
@@ -219,9 +219,9 @@ export default function AIChatAssistant({ products, onAddToCart }: AIChatAssista
 
       {/* Mobile Chat Window */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 md:bottom-20 md:right-6 md:w-80 md:h-96 md:inset-auto bg-white dark:bg-[#1a1a1a] rounded-t-2xl md:rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col">
+        <div className="fixed inset-0 z-50 md:bottom-20 md:right-6 md:w-80 md:h-96 md:inset-auto bg-white dark:bg-[#1a1a1a] rounded-t-2xl md:rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col max-h-screen overflow-hidden safe-top safe-bottom">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#F7DD0F] to-yellow-400 rounded-t-2xl">
+          <div className="flex items-center justify-between p-3 md:p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#F7DD0F] to-yellow-400 rounded-t-2xl flex-shrink-0">
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center">
                 <Sparkles className="w-4 h-4 text-[#F7DD0F]" />
@@ -251,7 +251,7 @@ export default function AIChatAssistant({ products, onAddToCart }: AIChatAssista
 
           {/* Messages */}
           {!isMinimized && (
-            <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide">
+            <div className="flex-1 overflow-y-auto p-3 md:p-4 space-y-3 md:space-y-4 scrollbar-hide min-h-0">
               {messages.map((message) => (
                 <div
                   key={message.id}
@@ -325,22 +325,22 @@ export default function AIChatAssistant({ products, onAddToCart }: AIChatAssista
 
           {/* Input */}
           {!isMinimized && (
-            <div className="p-4 border-t border-gray-200 dark:border-gray-700">
-              <div className="flex space-x-3">
+            <div className="p-3 md:p-4 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
+              <div className="flex space-x-2 md:space-x-3">
                 <Input
                   ref={inputRef}
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   onKeyPress={handleKeyPress}
                   placeholder="Ask me anything..."
-                  className="flex-1 bg-gray-100 dark:bg-gray-800 border-0 focus:ring-2 focus:ring-[#F7DD0F] text-sm h-12 rounded-xl touch-manipulation"
-                  style={{ minHeight: '48px' }}
+                  className="flex-1 bg-gray-100 dark:bg-gray-800 border-0 focus:ring-2 focus:ring-[#F7DD0F] text-sm h-11 md:h-12 rounded-xl touch-manipulation"
+                  style={{ minHeight: '44px' }}
                 />
                 <Button
                   onClick={handleSendMessage}
                   disabled={!inputValue.trim() || isTyping}
-                  className="bg-[#F7DD0F] text-black hover:bg-[#F7DD0F]/90 disabled:opacity-50 h-12 w-12 p-0 rounded-xl touch-manipulation"
-                  style={{ minHeight: '48px', minWidth: '48px' }}
+                  className="bg-[#F7DD0F] text-black hover:bg-[#F7DD0F]/90 disabled:opacity-50 h-11 w-11 md:h-12 md:w-12 p-0 rounded-xl touch-manipulation"
+                  style={{ minHeight: '44px', minWidth: '44px' }}
                 >
                   <Send className="w-5 h-5" />
                 </Button>
