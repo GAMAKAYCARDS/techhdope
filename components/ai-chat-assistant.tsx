@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { MessageCircle, Send, X, Bot, User, Loader2, Sparkles } from "lucide-react"
+import { MessageCircle, Send, X, Bot, User, Loader2, Sparkles, ChevronUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card } from "@/components/ui/card"
@@ -37,6 +37,7 @@ interface AIChatAssistantProps {
 
 export default function AIChatAssistant({ products, onAddToCart }: AIChatAssistantProps) {
   const [isOpen, setIsOpen] = useState(false)
+  const [isMinimized, setIsMinimized] = useState(false)
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -206,130 +207,146 @@ export default function AIChatAssistant({ products, onAddToCart }: AIChatAssista
 
   return (
     <>
-      {/* Chat Toggle Button */}
+      {/* Mobile Chat Toggle Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 z-50 bg-[#F7DD0F] text-black p-2.5 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110"
+        className="fixed bottom-6 right-6 z-50 bg-[#F7DD0F] text-black p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 touch-manipulation"
+        style={{ minHeight: '56px', minWidth: '56px' }}
         aria-label="Open AI Chat Assistant"
       >
-        {isOpen ? <X className="w-4 h-4" /> : <MessageCircle className="w-4 h-4" />}
+        {isOpen ? <X className="w-5 h-5" /> : <MessageCircle className="w-5 h-5" />}
       </button>
 
-      {/* Chat Window */}
+      {/* Mobile Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-20 right-6 z-50 w-72 h-80 bg-white dark:bg-[#1a1a1a] rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col">
+        <div className="fixed inset-0 z-50 md:bottom-20 md:right-6 md:w-80 md:h-96 md:inset-auto bg-white dark:bg-[#1a1a1a] rounded-t-2xl md:rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col">
           {/* Header */}
-          <div className="flex items-center justify-between p-2 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#F7DD0F] to-yellow-400 rounded-t-2xl">
-            <div className="flex items-center space-x-2">
-              <div className="w-6 h-6 bg-black rounded-full flex items-center justify-center">
-                <Sparkles className="w-3 h-3 text-[#F7DD0F]" />
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#F7DD0F] to-yellow-400 rounded-t-2xl">
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-black rounded-full flex items-center justify-center">
+                <Sparkles className="w-4 h-4 text-[#F7DD0F]" />
               </div>
               <div>
-                <h3 className="font-semibold text-black text-sm">DopeTech AI</h3>
-                <p className="text-xs text-black/70">Online • Ready to help</p>
+                <h3 className="font-semibold text-black text-base">DopeTech AI</h3>
+                <p className="text-sm text-black/70">Online • Ready to help</p>
               </div>
             </div>
-            <button
-              onClick={() => setIsOpen(false)}
-              className="p-1 hover:bg-black/10 rounded-full transition-colors"
-            >
-              <X className="w-4 h-4 text-black" />
-            </button>
+            <div className="flex items-center space-x-2">
+              <button
+                onClick={() => setIsMinimized(!isMinimized)}
+                className="p-2 hover:bg-black/10 rounded-full transition-colors touch-manipulation"
+                style={{ minHeight: '44px', minWidth: '44px' }}
+              >
+                <ChevronUp className={`w-4 h-4 text-black transition-transform ${isMinimized ? 'rotate-180' : ''}`} />
+              </button>
+              <button
+                onClick={() => setIsOpen(false)}
+                className="p-2 hover:bg-black/10 rounded-full transition-colors touch-manipulation"
+                style={{ minHeight: '44px', minWidth: '44px' }}
+              >
+                <X className="w-4 h-4 text-black" />
+              </button>
+            </div>
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-2 space-y-2">
-            {messages.map((message) => (
-              <div
-                key={message.id}
-                className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}
-              >
-                <div className={`flex items-start space-x-2 max-w-[85%] ${message.sender === "user" ? "flex-row-reverse space-x-reverse" : ""}`}>
-                  <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
-                    message.sender === "user" 
-                      ? "bg-[#F7DD0F] text-black" 
-                      : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
-                  }`}>
-                    {message.sender === "user" ? <User className="w-3 h-3" /> : <Bot className="w-3 h-3" />}
-                  </div>
-                  
-                  <div className={`rounded-2xl px-3 py-2 ${
-                    message.sender === "user"
-                      ? "bg-[#F7DD0F] text-black"
-                      : "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-                  }`}>
-                    <p className="text-xs whitespace-pre-wrap">{message.content}</p>
+          {!isMinimized && (
+            <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-hide">
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}
+                >
+                  <div className={`flex items-start space-x-3 max-w-[85%] ${message.sender === "user" ? "flex-row-reverse space-x-reverse" : ""}`}>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                      message.sender === "user" 
+                        ? "bg-[#F7DD0F] text-black" 
+                        : "bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
+                    }`}>
+                      {message.sender === "user" ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
+                    </div>
                     
-                    {/* Product Card */}
-                    {message.type === "product" && message.product && (
-                      <Card className="mt-2 p-2 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600">
-                        <div className="flex items-center space-x-2">
-                          <img
-                            src={message.product.image}
-                            alt={message.product.name}
-                            className="w-8 h-8 object-cover rounded-lg"
-                          />
-                          <div className="flex-1">
-                            <h4 className="font-medium text-xs">{message.product.name}</h4>
-                            <p className="text-[#F7DD0F] font-bold text-xs">${message.product.price}</p>
+                    <div className={`rounded-2xl px-4 py-3 ${
+                      message.sender === "user"
+                        ? "bg-[#F7DD0F] text-black"
+                        : "bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+                    }`}>
+                      <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                      
+                      {/* Product Card */}
+                      {message.type === "product" && message.product && (
+                        <Card className="mt-3 p-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600">
+                          <div className="flex items-center space-x-3">
+                            <img
+                              src={message.product.image}
+                              alt={message.product.name}
+                              className="w-12 h-12 object-cover rounded-lg"
+                            />
+                            <div className="flex-1">
+                              <h4 className="font-medium text-sm">{message.product.name}</h4>
+                              <p className="text-[#F7DD0F] font-bold text-sm">Rs {message.product.price.toLocaleString()}</p>
+                            </div>
+                            <Button
+                              onClick={() => handleProductAddToCart(message.product!)}
+                              className="bg-[#F7DD0F] text-black hover:bg-[#F7DD0F]/90 text-sm px-3 py-2 h-10 touch-manipulation"
+                              style={{ minHeight: '40px' }}
+                            >
+                              Add
+                            </Button>
                           </div>
-                          <Button
-                            size="sm"
-                            onClick={() => handleProductAddToCart(message.product!)}
-                            className="bg-[#F7DD0F] text-black hover:bg-[#F7DD0F]/90 text-xs px-2 py-1 h-6"
-                          >
-                            Add
-                          </Button>
-                        </div>
-                      </Card>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ))}
-            
-            {/* Typing Indicator */}
-            {isTyping && (
-              <div className="flex justify-start">
-                <div className="flex items-start space-x-2">
-                  <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                    <Bot className="w-3 h-3 text-gray-600 dark:text-gray-300" />
-                  </div>
-                  <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl px-3 py-2">
-                    <div className="flex space-x-1">
-                      <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce"></div>
-                      <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
-                      <div className="w-1.5 h-1.5 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+                        </Card>
+                      )}
                     </div>
                   </div>
                 </div>
-              </div>
-            )}
-            
-            <div ref={messagesEndRef} />
-          </div>
+              ))}
+              
+              {/* Typing Indicator */}
+              {isTyping && (
+                <div className="flex justify-start">
+                  <div className="flex items-start space-x-3">
+                    <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                      <Bot className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                    </div>
+                    <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl px-4 py-3">
+                      <div className="flex space-x-2">
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
+                        <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              <div ref={messagesEndRef} />
+            </div>
+          )}
 
           {/* Input */}
-          <div className="p-2 border-t border-gray-200 dark:border-gray-700">
-            <div className="flex space-x-2">
-              <Input
-                ref={inputRef}
-                value={inputValue}
-                onChange={(e) => setInputValue(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Ask me anything..."
-                className="flex-1 bg-gray-100 dark:bg-gray-800 border-0 focus:ring-2 focus:ring-[#F7DD0F] text-xs h-8"
-              />
-              <Button
-                onClick={handleSendMessage}
-                disabled={!inputValue.trim() || isTyping}
-                className="bg-[#F7DD0F] text-black hover:bg-[#F7DD0F]/90 disabled:opacity-50 h-8 w-8 p-0"
-                size="sm"
-              >
-                <Send className="w-3 h-3" />
-              </Button>
+          {!isMinimized && (
+            <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+              <div className="flex space-x-3">
+                <Input
+                  ref={inputRef}
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Ask me anything..."
+                  className="flex-1 bg-gray-100 dark:bg-gray-800 border-0 focus:ring-2 focus:ring-[#F7DD0F] text-sm h-12 rounded-xl touch-manipulation"
+                  style={{ minHeight: '48px' }}
+                />
+                <Button
+                  onClick={handleSendMessage}
+                  disabled={!inputValue.trim() || isTyping}
+                  className="bg-[#F7DD0F] text-black hover:bg-[#F7DD0F]/90 disabled:opacity-50 h-12 w-12 p-0 rounded-xl touch-manipulation"
+                  style={{ minHeight: '48px', minWidth: '48px' }}
+                >
+                  <Send className="w-5 h-5" />
+                </Button>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
     </>
