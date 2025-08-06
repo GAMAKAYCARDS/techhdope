@@ -219,7 +219,7 @@ export default function AIChatAssistant({ products, onAddToCart }: AIChatAssista
 
       {/* Mobile Chat Window */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 md:bottom-20 md:right-6 md:w-80 md:h-96 md:inset-auto bg-white dark:bg-[#1a1a1a] rounded-t-2xl md:rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col max-h-screen overflow-hidden safe-top safe-bottom">
+        <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 z-50 md:bottom-20 md:right-6 md:left-auto md:transform-none md:w-80 md:h-96 bg-white dark:bg-[#1a1a1a] rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden" style={{ height: '400px', width: '320px', maxHeight: '60vh' }}>
           {/* Header */}
           <div className="flex items-center justify-between p-3 md:p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#F7DD0F] to-yellow-400 rounded-t-2xl flex-shrink-0">
             <div className="flex items-center space-x-3">
@@ -251,7 +251,7 @@ export default function AIChatAssistant({ products, onAddToCart }: AIChatAssista
 
           {/* Messages */}
           {!isMinimized && (
-            <div className="flex-1 overflow-y-auto p-3 md:p-4 space-y-3 md:space-y-4 scrollbar-hide min-h-0">
+            <div className="flex-1 overflow-y-auto p-2 md:p-4 space-y-2 md:space-y-4 scrollbar-hide min-h-0">
               {messages.map((message) => (
                 <div
                   key={message.id}
@@ -325,7 +325,7 @@ export default function AIChatAssistant({ products, onAddToCart }: AIChatAssista
 
           {/* Input */}
           {!isMinimized && (
-            <div className="p-3 md:p-4 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
+            <div className="p-2 md:p-4 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
               <div className="flex space-x-2 md:space-x-3">
                 <Input
                   ref={inputRef}
