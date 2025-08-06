@@ -9,20 +9,29 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   style: ["normal", "italic"],
   display: "swap",
   preload: true,
+  fallback: ['system-ui', 'arial'],
 })
 
 export const metadata: Metadata = {
   title: "DopeTech Nepal - Premium Tech Gear",
   description: "Premium tech gear from DopeTech Nepal. Mechanical keyboards, gaming mice, wireless headphones, and more. Your setup, perfected.",
-  keywords: "tech gear, mechanical keyboard, gaming mouse, wireless headphones, Nepal, DopeTech",
+  keywords: "tech gear, mechanical keyboard, gaming mouse, wireless headphones, Nepal, DopeTech, gaming peripherals, RGB keyboard, wireless mouse",
   authors: [{ name: "DopeTech Nepal" }],
   creator: "DopeTech Nepal",
   publisher: "DopeTech Nepal",
   generator: 'Next.js',
+  applicationName: 'DopeTech Nepal',
+  referrer: 'origin-when-cross-origin',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'DopeTech'
+    title: 'DopeTech',
+    startupImage: [
+      {
+        url: '/images/dopetech-logo-new.png',
+        media: '(device-width: 320px) and (device-height: 568px)',
+      },
+    ],
   },
   formatDetection: {
     telephone: false,
@@ -61,18 +70,23 @@ export const metadata: Metadata = {
     title: 'DopeTech Nepal - Premium Tech Gear',
     description: 'Premium tech gear from DopeTech Nepal. Mechanical keyboards, gaming mice, wireless headphones, and more.',
     images: ['/images/dopetech-logo-new.png'],
+    creator: '@dopetech_np',
   },
   verification: {
     google: 'your-google-verification-code',
   },
-}
-
-export const viewport = {
-  width: 'device-width',
-  initialScale: 1,
-  maximumScale: 5,
-  themeColor: '#F7DD0F',
-  colorScheme: 'dark',
+  alternates: {
+    canonical: 'https://dopetech-nepal.com',
+  },
+  other: {
+    'mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-status-bar-style': 'default',
+    'apple-mobile-web-app-title': 'DopeTech',
+    'application-name': 'DopeTech Nepal',
+    'msapplication-TileColor': '#F7DD0F',
+    'msapplication-config': '/browserconfig.xml',
+  },
 }
 
 export default function RootLayout({
@@ -83,15 +97,34 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <head>
+        {/* Preconnect to external domains */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="//fonts.googleapis.com" />
+        
+        {/* Preload critical resources */}
+        <link rel="preload" href="/images/dopetech-logo-new.png" as="image" type="image/png" />
+        <link rel="preload" href="/products/keyboard.png" as="image" type="image/png" />
+        
+        {/* Meta tags for performance */}
         <meta name="theme-color" content="#F7DD0F" />
         <meta name="msapplication-TileColor" content="#F7DD0F" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="DopeTech" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5" />
+        <meta name="format-detection" content="telephone=no" />
+        
+        {/* PWA manifest */}
         <link rel="manifest" href="/manifest.json" />
+        
+        {/* Favicon */}
+        <link rel="icon" href="/images/dopetech-logo-new.png" />
+        <link rel="apple-touch-icon" href="/images/dopetech-logo-new.png" />
+        
+        {/* Performance hints */}
+        <link rel="dns-prefetch" href="//www.google-analytics.com" />
+        <link rel="dns-prefetch" href="//www.googletagmanager.com" />
       </head>
       <body className={plusJakartaSans.className} suppressHydrationWarning={true}>
         {children}

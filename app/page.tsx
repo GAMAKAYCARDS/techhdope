@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, useMemo, useCallback } from "react"
 import {
   Headphones,
   Keyboard,
@@ -27,8 +27,10 @@ import {
 } from "lucide-react"
 import DVDBouncer from "@/components/dvd-bouncer"
 import CursorTracker from "@/components/cursor-tracker"
-
 import AIChatAssistant from "@/components/ai-chat-assistant"
+import OptimizedProductCard from "@/components/optimized-product-card"
+import { GridSkeleton } from "@/components/ui/loading-skeleton"
+import SEOOptimizer, { defaultStructuredData } from "@/components/seo-optimizer"
 
 import { Shield, LogOut } from "lucide-react"
 
@@ -146,13 +148,23 @@ export default function DopeTechEcommerce() {
   const [isAdmin, setIsAdmin] = useState(false)
 
   const [animationKey, setAnimationKey] = useState(0)
+  const [isLoading, setIsLoading] = useState(true)
   const searchModalRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const handleScroll = () => setScrollY(window.scrollY)
       window.addEventListener("scroll", handleScroll)
-      return () => window.removeEventListener("scroll", handleScroll)
+      
+      // Simulate loading completion
+      const timer = setTimeout(() => {
+        setIsLoading(false)
+      }, 1000)
+      
+      return () => {
+        window.removeEventListener("scroll", handleScroll)
+        clearTimeout(timer)
+      }
     }
   }, [])
 
@@ -281,7 +293,7 @@ export default function DopeTechEcommerce() {
 
 
 
-  const addToCart = (product: Product) => {
+  const addToCart = useCallback((product: Product) => {
     setCart(prev => {
       const existing = prev.find(item => item.id === product.id)
       if (existing) {
@@ -299,7 +311,7 @@ export default function DopeTechEcommerce() {
       ...prev,
       cartItems: [...prev.cartItems, product.id]
     }))
-  }
+  }, [])
 
   const handleCategoryClick = (categoryId: string) => {
     console.log("Category clicked:", categoryId) // Debug log
@@ -347,19 +359,21 @@ export default function DopeTechEcommerce() {
     return cart.reduce((count, item) => count + item.quantity, 0)
   }
 
-  const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         product.description.toLowerCase().includes(searchQuery.toLowerCase())
-    
-    // If there's a search query, prioritize search results over category filtering
-    if (searchQuery.trim()) {
-      return matchesSearch
-    }
-    
-    // If no search query, filter by category
-    const matchesCategory = selectedCategory === "all" || product.category === selectedCategory
-    return matchesCategory
-  })
+  const filteredProducts = useMemo(() => {
+    return products.filter(product => {
+      const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           product.description.toLowerCase().includes(searchQuery.toLowerCase())
+      
+      // If there's a search query, prioritize search results over category filtering
+      if (searchQuery.trim()) {
+        return matchesSearch
+      }
+      
+      // If no search query, filter by category
+      const matchesCategory = selectedCategory === "all" || product.category === selectedCategory
+      return matchesCategory
+    })
+  }, [searchQuery, selectedCategory])
 
   // Debug logging
   console.log("Search query:", searchQuery)
@@ -376,8 +390,20 @@ export default function DopeTechEcommerce() {
   ]
 
   return (
-    <div className="text-white min-h-screen transition-colors duration-100 tap-feedback scrollbar-hide" style={{ background: 'linear-gradient(135deg, #000000 0%, #1a1a1a 30%, #1a1a0a 50%, #1a1a1a 70%, #000000 100%)' }}>
-      <CursorTracker />
+    <>
+      <SEOOptimizer structuredData={defaultStructuredData} />
+      <div className="text-white min-h-screen transition-colors duration-100 tap-feedback scrollbar-hide gradient-bg">
+        <CursorTracker />
+      
+      {/* Loading Overlay */}
+      {isLoading && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-16 h-16 border-4 border-[#F7DD0F] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-[#F7DD0F] font-semibold">Loading DopeTech...</p>
+          </div>
+        </div>
+      )}
 
       {/* Enhanced Mobile Navigation */}
       <header className="fixed top-0 left-0 right-0 z-50 dopetech-nav animate-fade-in-down">
@@ -860,5 +886,6 @@ export default function DopeTechEcommerce() {
         onAddToCart={addToCart}
       />
     </div>
+    </>
   )
 }
