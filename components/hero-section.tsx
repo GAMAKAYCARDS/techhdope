@@ -1,7 +1,7 @@
 "use client"
 
 import Image from 'next/image'
-import { Search, ShoppingBag, Menu } from 'lucide-react'
+import { Search, ShoppingBag, Menu, Instagram } from 'lucide-react'
 import { useState } from 'react'
 
 interface HeroSectionProps {
@@ -25,16 +25,16 @@ export default function HeroSection({ cartCount, onCartClick }: HeroSectionProps
       <nav className="absolute top-0 left-0 right-0 z-50 p-4 md:p-6 animate-fade-in-down">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           {/* Logo */}
-          <div className="flex items-center space-x-2 md:space-x-3">
-            <Image
-              src="/images/dopetech-logo-new.png"
-              alt="DopeTech"
-              width={32}
-              height={32}
-              className="w-8 h-8 md:w-10 md:h-10 logo-adaptive hover-scale"
-            />
-            <span className="text-white font-bold text-lg md:text-xl jakarta-light">DopeTech</span>
-          </div>
+                     <div className="flex items-center space-x-2 md:space-x-3">
+             <Image
+               src="/images/dtechnepal.svg"
+               alt="DopeTech"
+               width={320}
+               height={320}
+               className="w-64 h-64 md:w-80 md:h-80 logo-adaptive hover-scale"
+               style={{ minWidth: '256px', minHeight: '256px' }}
+             />
+           </div>
 
           {/* Desktop Search and Cart */}
           <div className="hidden md:flex items-center space-x-6">
@@ -47,18 +47,29 @@ export default function HeroSection({ cartCount, onCartClick }: HeroSectionProps
               />
             </div>
 
-            <button
-              onClick={onCartClick}
-              className="relative p-3 hover:bg-white/10 rounded-lg transition-colors touch-manipulation hover-scale hover-glow"
-              style={{ minHeight: '44px', minWidth: '44px' }}
-            >
-              <ShoppingBag className="w-6 h-6 text-white" />
-              {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-[#F7DD0F] text-black text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold animate-scale-in">
-                  {cartCount}
-                </span>
-              )}
-            </button>
+                         <button
+               onClick={onCartClick}
+               className="relative p-3 hover:bg-white/10 rounded-lg transition-colors touch-manipulation hover-scale hover-glow"
+               style={{ minHeight: '44px', minWidth: '44px' }}
+             >
+               <ShoppingBag className="w-6 h-6 text-white" />
+               {cartCount > 0 && (
+                 <span className="absolute -top-1 -right-1 bg-[#F7DD0F] text-black text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold animate-scale-in">
+                   {cartCount}
+                 </span>
+               )}
+             </button>
+
+             {/* Instagram Button */}
+             <a
+               href="https://www.instagram.com/dopetech_np/?hl=ne"
+               target="_blank"
+               rel="noopener noreferrer"
+               className="relative p-3 hover:bg-white/10 rounded-lg transition-colors touch-manipulation hover-scale hover-glow"
+               style={{ minHeight: '44px', minWidth: '44px' }}
+             >
+               <Instagram className="w-6 h-6 text-white" />
+             </a>
           </div>
 
           {/* Mobile Search and Cart */}
@@ -73,18 +84,29 @@ export default function HeroSection({ cartCount, onCartClick }: HeroSectionProps
             </button>
 
             {/* Mobile Cart */}
-            <button
-              onClick={onCartClick}
-              className="relative p-2 hover:bg-white/10 rounded-lg transition-colors touch-manipulation"
-              style={{ minHeight: '44px', minWidth: '44px' }}
-            >
-              <ShoppingBag className="w-5 h-5 text-white" />
-              {cartCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-[#F7DD0F] text-black text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold animate-scale-in">
-                  {cartCount}
-                </span>
-              )}
-            </button>
+                         <button
+               onClick={onCartClick}
+               className="relative p-2 hover:bg-white/10 rounded-lg transition-colors touch-manipulation"
+               style={{ minHeight: '44px', minWidth: '44px' }}
+             >
+               <ShoppingBag className="w-5 h-5 text-white" />
+               {cartCount > 0 && (
+                 <span className="absolute -top-1 -right-1 bg-[#F7DD0F] text-black text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold animate-scale-in">
+                   {cartCount}
+                 </span>
+               )}
+             </button>
+
+             {/* Instagram Button */}
+             <a
+               href="https://www.instagram.com/dopetech_np/?hl=ne"
+               target="_blank"
+               rel="noopener noreferrer"
+               className="relative p-2 hover:bg-white/10 rounded-lg transition-colors touch-manipulation"
+               style={{ minHeight: '44px', minWidth: '44px' }}
+             >
+               <Instagram className="w-5 h-5 text-white" />
+             </a>
           </div>
         </div>
 

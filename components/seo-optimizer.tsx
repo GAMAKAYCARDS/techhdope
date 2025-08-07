@@ -17,7 +17,7 @@ export default function SEOOptimizer({
   title = "DopeTech Nepal - Premium Tech Gear",
   description = "Premium tech gear from DopeTech Nepal. Mechanical keyboards, gaming mice, wireless headphones, and more. Your setup, perfected.",
   keywords = "tech gear, mechanical keyboard, gaming mouse, wireless headphones, Nepal, DopeTech, gaming peripherals, RGB keyboard, wireless mouse",
-  image = "/images/dopetech-logo-new.png",
+        image = "/images/dtechnepal.svg",
   url = "https://dopetech-nepal.com",
   type = "website",
   structuredData
@@ -91,8 +91,8 @@ export default function SEOOptimizer({
       <link rel="preload" href={image} as="image" />
       
       {/* Favicon */}
-      <link rel="icon" href="/images/dopetech-logo-new.png" />
-      <link rel="apple-touch-icon" href="/images/dopetech-logo-new.png" />
+              <link rel="icon" href="/images/dtechnepal.svg" />
+        <link rel="apple-touch-icon" href="/images/dtechnepal.svg" />
     </Head>
   )
 }
@@ -103,7 +103,7 @@ export const defaultStructuredData = {
   "@type": "Organization",
   "name": "DopeTech Nepal",
   "url": "https://dopetech-nepal.com",
-  "logo": "https://dopetech-nepal.com/images/dopetech-logo-new.png",
+        "logo": "https://dopetech-nepal.com/images/dtechnepal.svg",
   "description": "Premium tech gear from DopeTech Nepal. Mechanical keyboards, gaming mice, wireless headphones, and more.",
   "address": {
     "@type": "PostalAddress",

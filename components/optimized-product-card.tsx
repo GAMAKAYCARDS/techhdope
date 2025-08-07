@@ -129,6 +129,9 @@ export default function OptimizedProductCard({
             loading="lazy"
             decoding="async"
             onLoad={() => setImageLoaded(true)}
+            onError={(e) => {
+              e.currentTarget.src = '/products/placeholder.svg';
+            }}
           />
         )}
 

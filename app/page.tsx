@@ -20,10 +20,10 @@ import {
   Filter,
   Grid,
   List,
-  Instagram,
   RefreshCw,
   TrendingUp,
   Menu,
+  Instagram,
 } from "lucide-react"
 import DVDBouncer from "@/components/dvd-bouncer"
 import CursorTracker from "@/components/cursor-tracker"
@@ -31,103 +31,19 @@ import AIChatAssistant from "@/components/ai-chat-assistant"
 import OptimizedProductCard from "@/components/optimized-product-card"
 import { GridSkeleton } from "@/components/ui/loading-skeleton"
 import SEOOptimizer, { defaultStructuredData } from "@/components/seo-optimizer"
+import { allProducts, type Product } from "@/lib/products-data"
 
 import { Shield, LogOut } from "lucide-react"
 
-// Product type definition
-interface Product {
-  id: number
-  name: string
-  price: number
-  originalPrice: number
-  image: string
-  category: string
-  rating: number
-  reviews: number
-  description: string
-  features: string[]
-  inStock: boolean
-  discount: number
-}
+// Product type is now imported from lib/products-data
 
 // Cart item type definition
 interface CartItem extends Product {
   quantity: number
 }
 
-// Product data with actual images
-const products: Product[] = [
-  {
-    id: 1,
-    name: "DopeTech Mechanical Keyboard",
-    price: 299.99,
-    originalPrice: 349.99,
-    image: "/products/keyboard.png",
-    category: "keyboard",
-    rating: 0,
-    reviews: 0,
-    description: "Premium mechanical keyboard with Cherry MX switches",
-    features: ["RGB Backlight", "Wireless", "Programmable Keys"],
-    inStock: true,
-    discount: 14
-  },
-  {
-    id: 2,
-    name: "DopeTech Gaming Mouse",
-    price: 89.99,
-    originalPrice: 119.99,
-    image: "/products/Screenshot 2025-08-02 215024.png",
-    category: "mouse",
-    rating: 0,
-    reviews: 0,
-    description: "High-precision gaming mouse with 25,600 DPI",
-    features: ["25,600 DPI", "RGB", "Programmable Buttons"],
-    inStock: true,
-    discount: 25
-  },
-  {
-    id: 3,
-    name: "DopeTech Wireless Headphones",
-    price: 199.99,
-    originalPrice: 249.99,
-    image: "/products/Screenshot 2025-08-02 215007.png",
-    category: "audio",
-    rating: 0,
-    reviews: 0,
-    description: "Studio-grade wireless headphones with ANC",
-    features: ["Active Noise Cancellation", "40h Battery", "Bluetooth 5.0"],
-    inStock: true,
-    discount: 20
-  },
-  {
-    id: 4,
-    name: "DopeTech Smart Speaker",
-    price: 149.99,
-    originalPrice: 179.99,
-    image: "/products/Screenshot 2025-08-02 215110.png",
-    category: "speaker",
-    rating: 0,
-    reviews: 0,
-    description: "360-degree smart speaker with voice control",
-    features: ["360° Audio", "Voice Control", "Smart Home Integration"],
-    inStock: true,
-    discount: 17
-  },
-  {
-    id: 5,
-    name: "DopeTech Security Key",
-    price: 49.99,
-    originalPrice: 59.99,
-    image: "/products/key.png",
-    category: "accessories",
-    rating: 0,
-    reviews: 0,
-    description: "Biometric security key for enhanced protection",
-    features: ["Fingerprint Sensor", "NFC", "Water Resistant"],
-    inStock: true,
-    discount: 17
-  }
-]
+// Products data imported from lib/products-data
+const products: Product[] = allProducts
 
 export default function DopeTechEcommerce() {
   const [scrollY, setScrollY] = useState(0)
@@ -359,6 +275,17 @@ export default function DopeTechEcommerce() {
     return cart.reduce((count, item) => count + item.quantity, 0)
   }
 
+  const handleCheckout = () => {
+    if (cart.length === 0) {
+      alert("Your cart is empty!")
+      return
+    }
+    
+    const total = getCartTotal()
+    alert(`Proceeding to checkout with ${cart.length} items. Total: Rs ${total.toFixed(2)}`)
+    // Here you would typically redirect to a checkout page or payment processor
+  }
+
   const filteredProducts = useMemo(() => {
     return products.filter(product => {
       const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -386,7 +313,8 @@ export default function DopeTechEcommerce() {
     { id: "mouse", name: "Mice", icon: Mouse },
     { id: "audio", name: "Audio", icon: Headphones },
     { id: "speaker", name: "Speakers", icon: Speaker },
-    { id: "accessories", name: "Accessories", icon: Cable },
+    { id: "monitor", name: "Monitors", icon: Camera },
+    { id: "accessory", name: "Accessories", icon: Cable },
   ]
 
   return (
@@ -407,67 +335,72 @@ export default function DopeTechEcommerce() {
 
       {/* Enhanced Mobile Navigation */}
       <header className="fixed top-0 left-0 right-0 z-50 dopetech-nav animate-fade-in-down">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
-          <nav className="flex items-center justify-between h-12 sm:h-14 md:h-16">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-3 md:py-4">
+          <nav className="flex items-center justify-between h-10 sm:h-12 md:h-14 lg:h-16">
             {/* Left Side - Logo */}
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <img src="/images/dopetech-logo-new.png" alt="DopeTech" className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 logo-adaptive" />
-              <span className="text-sm sm:text-base md:text-lg font-semibold jakarta-subtitle hidden sm:block">DopeTech Nepal</span>
+            <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-3 min-w-0 flex-1">
+              <img src="/images/dtechnepal.svg" alt="DopeTech" className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 logo-adaptive flex-shrink-0" />
 
               {isAdmin && (
-                <div className="flex items-center space-x-1 ml-2">
-                  <Shield className="w-3 h-3 sm:w-4 sm:h-4 text-[#F7DD0F]" />
+                <div className="flex items-center space-x-1 ml-1 sm:ml-2 flex-shrink-0">
+                  <Shield className="w-2 h-2 sm:w-3 sm:h-3 md:w-4 md:h-4 text-[#F7DD0F]" />
                   <span className="text-xs sm:text-sm text-[#F7DD0F] font-medium">ADMIN</span>
                 </div>
               )}
             </div>
 
-
-
             {/* Right Side - Controls */}
-            <div className="flex items-center justify-center space-x-2 sm:space-x-3 md:space-x-4">
+            <div className="flex items-center justify-end space-x-1 sm:space-x-2 md:space-x-3 lg:space-x-4 flex-shrink-0">
               {/* Search Toggle */}
               <button
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
-                className="nav-icon-button p-2 sm:p-3 touch-target"
+                className="nav-icon-button p-1.5 sm:p-2 md:p-3 touch-target flex items-center justify-center hover-scale"
                 aria-label="Search"
+                style={{ minHeight: '36px', minWidth: '36px' }}
               >
-                <Search className="w-5 h-5 sm:w-6 sm:h-6 hover:text-[#F7DD0F] transition-colors" />
+                <Search className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 hover:text-[#F7DD0F] transition-colors" />
               </button>
-
-              {/* Instagram Button */}
-              <a
-                href="https://www.instagram.com/dopetech_np/?hl=en"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="nav-icon-button p-2 sm:p-3 touch-target"
-                aria-label="Follow us on Instagram"
-              >
-                <Instagram className="w-5 h-5 sm:w-6 sm:h-6 hover:text-[#F7DD0F] transition-colors" />
-              </a>
 
               {/* Shopping Cart with Badge */}
               <button 
                 onClick={() => setCartOpen(true)}
-                className="nav-icon-button relative p-2 sm:p-3 touch-target" 
+                className="nav-icon-button relative p-1.5 sm:p-2 md:p-3 touch-target flex items-center justify-center hover-scale" 
                 aria-label="Shopping Cart"
+                style={{ minHeight: '36px', minWidth: '36px' }}
               >
-                <ShoppingBag className="w-5 h-5 sm:w-6 sm:h-6 hover:text-[#F7DD0F] transition-colors" />
+                <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 hover:text-[#F7DD0F] transition-colors" />
                 {getCartCount() > 0 && (
-                  <span className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-[#F7DD0F] text-black text-xs rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center font-bold animate-scale-in">
+                  <span className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 md:-top-2 md:-right-2 bg-[#F7DD0F] text-black text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 flex items-center justify-center font-bold animate-bounce">
                     {getCartCount()}
                   </span>
                 )}
               </button>
 
+              {/* Instagram Button */}
+              <a
+                href="https://www.instagram.com/dopetech_np/?hl=ne"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="nav-icon-button p-1.5 sm:p-2 md:p-3 touch-target flex items-center justify-center hover-scale"
+                aria-label="Instagram"
+                style={{ minHeight: '36px', minWidth: '36px' }}
+              >
+                <Instagram className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 hover:text-[#F7DD0F] transition-colors" />
+              </a>
+
               {/* Mobile Menu Toggle */}
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden nav-icon-button p-2 sm:p-3 touch-target"
+                className="md:hidden nav-icon-button p-1.5 sm:p-2 touch-target flex items-center justify-center hover-scale"
                 aria-label="Menu"
                 data-mobile-menu
+                style={{ minHeight: '36px', minWidth: '36px' }}
               >
-                <Menu className="w-5 h-5 sm:w-6 sm:h-6 hover:text-[#F7DD0F] transition-colors" />
+                {isMobileMenuOpen ? (
+                  <X className="w-4 h-4 sm:w-5 sm:h-5 hover:text-[#F7DD0F] transition-colors animate-scale-in" />
+                ) : (
+                  <Menu className="w-4 h-4 sm:w-5 sm:h-5 hover:text-[#F7DD0F] transition-colors" />
+                )}
               </button>
             </div>
           </nav>
@@ -513,8 +446,8 @@ export default function DopeTechEcommerce() {
 
           {/* Mobile Menu */}
           {isMobileMenuOpen && (
-            <div className="mt-4 animate-slide-in-down bg-black/90 backdrop-blur-md rounded-xl p-4 border border-gray-700 md:hidden" data-mobile-menu>
-              <div className="space-y-3">
+            <div className="mt-2 sm:mt-4 animate-slide-in-down bg-black/90 backdrop-blur-md rounded-xl p-3 sm:p-4 border border-gray-700 md:hidden" data-mobile-menu>
+              <div className="space-y-2 sm:space-y-3">
                 {categories.map((category) => (
                   <button
                     key={category.id}
@@ -522,14 +455,15 @@ export default function DopeTechEcommerce() {
                       handleCategoryClick(category.id)
                       setIsMobileMenuOpen(false)
                     }}
-                    className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                    className={`w-full flex items-center space-x-2 sm:space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg transition-all duration-200 touch-target ${
                       selectedCategory === category.id
                         ? "bg-[#F7DD0F] text-black"
                         : "text-white hover:bg-white/10"
                     }`}
+                    style={{ minHeight: '44px' }}
                   >
-                    <category.icon className="w-5 h-5" />
-                    <span className="font-medium">{category.name}</span>
+                    <category.icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                    <span className="font-medium text-sm sm:text-base">{category.name}</span>
                   </button>
                 ))}
               </div>
@@ -544,14 +478,14 @@ export default function DopeTechEcommerce() {
           {/* Page Header */}
           <div className="text-center mb-4 sm:mb-6 md:mb-8">
             <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold mb-1 sm:mb-2 md:mb-3 animate-fade-in-up stagger-1 leading-tight">
-              Your Setup, <span className="text-[#F7DD0F]">Perfected</span>
+              Your Setup, <span className="text-[#F7DD0F] animate-pulse">Perfected</span>
             </h1>
             <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-300 mb-2 sm:mb-4 md:mb-6 animate-fade-in-up stagger-2 leading-relaxed">
-              Premium Tech Gear from <span className="text-[#F7DD0F]">DopeTech</span> Nepal
+              Premium Tech Gear from <span className="text-[#F7DD0F] animate-float">DopeTech</span> Nepal
             </p>
             
-            {/* Autoplay GIF */}
-            <div className="w-full max-w-4xl mx-auto mb-4 sm:mb-6 md:mb-8 animate-fade-in-up stagger-3">
+            {/* Autoplay GIF with Borderless Glow */}
+            <div className="w-full max-w-4xl mx-auto mb-4 sm:mb-6 md:mb-8 animate-fade-in-up stagger-3 borderless-glow">
               <img
                 src="/gif/doptechgif.gif"
                 alt="DopeTech Introduction"
@@ -566,9 +500,9 @@ export default function DopeTechEcommerce() {
                 <div key={category.id} className="relative animate-fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
                   <button
                     onClick={() => handleCategoryClick(category.id)}
-                    className={`flex items-center space-x-1 sm:space-x-1.5 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 md:py-3 rounded-full transition-all duration-200 cursor-pointer text-xs sm:text-sm md:text-base touch-target ${
+                    className={`flex items-center space-x-1 sm:space-x-1.5 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 md:py-3 rounded-full transition-all duration-200 cursor-pointer text-xs sm:text-sm md:text-base touch-target hover-scale hover-glow ${
                       selectedCategory === category.id
-                        ? "bg-[#F7DD0F] text-black shadow-lg"
+                        ? "bg-[#F7DD0F] text-black shadow-lg animate-pulse"
                         : "bg-white/10 backdrop-blur-sm border border-gray-200 dark:border-gray-700 hover:bg-[#F7DD0F]/10"
                     }`}
                     aria-label={`Filter by ${category.name}`}
@@ -591,8 +525,8 @@ export default function DopeTechEcommerce() {
                 : "grid-cols-1"
             }`}>
             {filteredProducts.map((product, index) => (
-              <div key={product.id} className="group animate-fade-in-up mobile-product-card" style={{ animationDelay: `${index * 0.1}s` }}>
-                <div className="dopetech-card p-2 sm:p-3 h-full flex flex-col premium-card">
+              <div key={product.id} className="group animate-fade-in-up mobile-product-card hover-lift" style={{ animationDelay: `${index * 0.1}s` }}>
+                <div className="dopetech-card p-2 sm:p-3 h-full flex flex-col premium-card hover-scale">
                   {/* Product Image */}
                   <div className="relative mb-1.5 sm:mb-2 image-container">
                     <img
@@ -782,56 +716,60 @@ export default function DopeTechEcommerce() {
           <div className="relative ml-auto w-full max-w-sm sm:max-w-md bg-white dark:bg-[#1a1a1a] shadow-2xl rounded-l-2xl">
             <div className="flex flex-col h-full">
               {/* Cart Header */}
-              <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200 dark:border-gray-700">
-                <h2 className="text-lg sm:text-xl font-semibold">Shopping Cart</h2>
+              <div className="flex items-center justify-between p-3 sm:p-4 md:p-6 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-base sm:text-lg md:text-xl font-semibold">Shopping Cart</h2>
                 <button
                   onClick={() => setCartOpen(false)}
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-[#2a2a2a] rounded-full transition-colors touch-target"
+                  className="p-2 sm:p-3 hover:bg-gray-100 dark:hover:bg-[#2a2a2a] rounded-full transition-colors touch-target"
+                  style={{ minHeight: '44px', minWidth: '44px' }}
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-5 h-5 sm:w-6 sm:h-6" />
                 </button>
               </div>
 
               {/* Cart Items */}
-              <div className="flex-1 overflow-y-auto p-4 sm:p-6 scrollbar-hide">
+              <div className="flex-1 overflow-y-auto p-3 sm:p-4 md:p-6 scrollbar-hide">
                 {cart.length === 0 ? (
-                  <div className="text-center py-12">
-                    <ShoppingBag className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-400">Your cart is empty</p>
+                  <div className="text-center py-8 sm:py-12">
+                    <ShoppingBag className="w-12 h-12 sm:w-16 sm:h-16 text-gray-400 mx-auto mb-3 sm:mb-4" />
+                    <p className="text-sm sm:text-base text-gray-400">Your cart is empty</p>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-3 sm:space-y-4">
                     {cart.map((item) => (
-                      <div key={item.id} className="flex items-center space-x-4 p-4 bg-gray-50 dark:bg-[#2a2a2a] rounded-lg">
+                      <div key={item.id} className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 bg-gray-50 dark:bg-[#2a2a2a] rounded-lg">
                         <img
                           src={item.image}
                           alt={item.name}
-                          className="w-16 h-16 object-cover rounded-lg"
+                          className="w-12 h-12 sm:w-16 sm:h-16 object-cover rounded-lg flex-shrink-0"
                         />
-                        <div className="flex-1">
-                          <h3 className="font-medium text-sm line-clamp-2">{item.name}</h3>
-                          <p className="text-[#F7DD0F] font-bold">Rs {item.price}</p>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-medium text-xs sm:text-sm line-clamp-2 leading-tight">{item.name}</h3>
+                          <p className="text-[#F7DD0F] font-bold text-sm sm:text-base">Rs {item.price}</p>
                         </div>
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center space-x-1 sm:space-x-2 flex-shrink-0">
                           <button
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                            className="p-1.5 hover:bg-gray-200 dark:hover:bg-[#2a2a2a] rounded touch-target"
+                            className="p-2 sm:p-1.5 hover:bg-gray-200 dark:hover:bg-[#2a2a2a] rounded touch-target"
+                            style={{ minHeight: '44px', minWidth: '44px' }}
                           >
-                            <Minus className="w-4 h-4" />
+                            <Minus className="w-4 h-4 sm:w-5 sm:h-5" />
                           </button>
-                          <span className="w-8 text-center font-medium">{item.quantity}</span>
+                          <span className="w-6 sm:w-8 text-center font-medium text-sm sm:text-base">{item.quantity}</span>
                           <button
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            className="p-1.5 hover:bg-gray-200 dark:hover:bg-[#2a2a2a] rounded touch-target"
+                            className="p-2 sm:p-1.5 hover:bg-gray-200 dark:hover:bg-[#2a2a2a] rounded touch-target"
+                            style={{ minHeight: '44px', minWidth: '44px' }}
                           >
-                            <Plus className="w-4 h-4" />
+                            <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
                           </button>
                         </div>
                         <button
                           onClick={() => removeFromCart(item.id)}
-                          className="p-1.5 hover:bg-red-100 dark:hover:bg-red-900/20 rounded text-red-500 touch-target"
+                          className="p-2 sm:p-1.5 hover:bg-red-100 dark:hover:bg-red-900/20 rounded text-red-500 touch-target"
+                          style={{ minHeight: '44px', minWidth: '44px' }}
                         >
-                          <X className="w-4 h-4" />
+                          <X className="w-4 h-4 sm:w-5 sm:h-5" />
                         </button>
                       </div>
                     ))}
@@ -841,12 +779,16 @@ export default function DopeTechEcommerce() {
 
               {/* Cart Footer */}
               {cart.length > 0 && (
-                <div className="border-t border-gray-200 dark:border-gray-700 p-4 sm:p-6">
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="text-lg font-semibold">Total:</span>
-                    <span className="text-2xl font-bold text-[#F7DD0F]">Rs {getCartTotal().toFixed(2)}</span>
+                <div className="border-t border-gray-200 dark:border-gray-700 p-3 sm:p-4 md:p-6">
+                  <div className="flex justify-between items-center mb-3 sm:mb-4">
+                    <span className="text-base sm:text-lg font-semibold">Total:</span>
+                    <span className="text-xl sm:text-2xl font-bold text-[#F7DD0F]">Rs {getCartTotal().toFixed(2)}</span>
                   </div>
-                  <button className="w-full bg-[#F7DD0F] text-black py-3.5 sm:py-4 px-4 rounded-xl font-medium hover:bg-[#F7DD0F]/90 transition-colors touch-target">
+                  <button 
+                    onClick={handleCheckout}
+                    className="w-full bg-[#F7DD0F] text-black py-3 sm:py-3.5 md:py-4 px-4 rounded-xl font-medium hover:bg-[#F7DD0F]/90 transition-colors touch-target"
+                    style={{ minHeight: '48px' }}
+                  >
                     Checkout
                   </button>
                 </div>
@@ -857,11 +799,11 @@ export default function DopeTechEcommerce() {
       )}
 
       {/* Footer - Mobile Optimized */}
-      <footer className="bg-black py-12 sm:py-16 border-t-2 border-[#F7DD0F]">
+      <footer className="bg-black py-4 sm:py-6 border-t-2 border-[#F7DD0F]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-3 mb-6 md:mb-0">
-              <img src="/images/dopetech-logo-new.png" alt="DopeTech" className="w-8 h-8 sm:w-10 sm:h-10 logo-adaptive" />
+              <img src="/images/dtechnepal.svg" alt="DopeTech" className="w-8 h-8 sm:w-10 sm:h-10 logo-adaptive" />
               <span className="text-xs sm:text-sm text-white jakarta-light">© 2025 DopeTech Nepal. All rights reserved.</span>
             </div>
 
