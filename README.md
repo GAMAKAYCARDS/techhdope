@@ -194,6 +194,24 @@ NEXT_PUBLIC_ANALYTICS_ID=your-ga-id
 - **Meta tag** optimization
 - **Sitemap** generation
 
+## 🔐 Admin Access
+
+### Secure Admin Panel
+- **Access URL**: `http://localhost:3001/doptechadmin/`
+- **Password**: `dopetech2024`
+- **Features**:
+  - Add/edit/delete products
+  - View analytics dashboard
+  - Monitor site performance
+  - Manage inventory
+
+### Security Features
+- **Hidden Access**: Admin panel is not linked from main site
+- **Password Protected**: Secure authentication required
+- **Session Management**: 8-hour session timeout
+- **Secure Route**: Direct URL access only (`/doptechadmin` only)
+- **No Alternative Routes**: `/admin` route has been removed for security
+
 ## 🔮 Future Enhancements
 
 ### Planned Features

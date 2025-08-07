@@ -40,7 +40,6 @@ const nextConfig = {
     pagesBufferLength: 2,
   },
   // Performance optimizations
-  swcMinify: true,
   reactStrictMode: true,
   // Asset optimization
   assetPrefix: process.env.NODE_ENV === 'production' ? '' : '',

@@ -24,6 +24,10 @@ import {
   TrendingUp,
   Menu,
   Instagram,
+  Gamepad2,
+  Laptop,
+  Smartphone,
+  Monitor,
 } from "lucide-react"
 import DVDBouncer from "@/components/dvd-bouncer"
 import CursorTracker from "@/components/cursor-tracker"
@@ -45,6 +49,55 @@ interface CartItem extends Product {
 // Products data imported from lib/products-data
 const products: Product[] = allProducts
 
+// Check for admin products in localStorage
+const getProducts = (): Product[] => {
+  if (typeof window !== 'undefined') {
+    try {
+      const adminProducts = localStorage.getItem('adminProducts')
+      const originalProductEdits = localStorage.getItem('originalProductEdits')
+      console.log('Checking localStorage for admin products:', adminProducts)
+      console.log('Checking localStorage for original product edits:', originalProductEdits)
+      
+      let result = [...allProducts]
+      
+      // Apply original product edits if they exist
+      if (originalProductEdits) {
+        try {
+          const parsedEdits = JSON.parse(originalProductEdits)
+          console.log('Parsed original product edits:', parsedEdits)
+          // Replace original products with edited versions
+          result = result.map(product => {
+            const edit = parsedEdits.find((p: any) => p.id === product.id)
+            return edit || product
+          })
+        } catch (e) {
+          console.error('Error parsing original product edits:', e)
+        }
+      }
+      
+      // Add admin-added products if they exist
+      if (adminProducts) {
+        try {
+          const parsed = JSON.parse(adminProducts)
+          console.log('Parsed admin products:', parsed)
+          // Only return admin-added products (those with IDs higher than original products)
+          const adminAddedProducts = parsed.filter((p: any) => p.id > 5) // Original products have IDs 1-5
+          console.log('Filtered admin products (ID > 5):', adminAddedProducts)
+          result = [...result, ...adminAddedProducts]
+        } catch (e) {
+          console.error('Error parsing admin products:', e)
+        }
+      }
+      
+      console.log('Final products list:', result)
+      return result
+    } catch (error) {
+      console.error('Error accessing localStorage:', error)
+    }
+  }
+  return allProducts
+}
+
 export default function DopeTechEcommerce() {
   const [scrollY, setScrollY] = useState(0)
   const [cart, setCart] = useState<CartItem[]>([])
@@ -55,13 +108,14 @@ export default function DopeTechEcommerce() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [searchModalReady, setSearchModalReady] = useState(false)
+  const [currentProducts, setCurrentProducts] = useState<Product[]>(allProducts)
 
   const [userBehavior, setUserBehavior] = useState({
     viewedProducts: [] as number[],
     cartItems: [] as number[],
     searchHistory: [] as string[]
   })
-  const [isAdmin, setIsAdmin] = useState(false)
+
 
   const [animationKey, setAnimationKey] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
@@ -81,6 +135,46 @@ export default function DopeTechEcommerce() {
         window.removeEventListener("scroll", handleScroll)
         clearTimeout(timer)
       }
+    }
+  }, [])
+
+  // Update products when localStorage changes
+  useEffect(() => {
+    const updatedProducts = getProducts()
+    setCurrentProducts(updatedProducts)
+    
+    // Debug: Check what's in localStorage
+    if (typeof window !== 'undefined') {
+      try {
+        console.log('Current localStorage adminProducts:', localStorage.getItem('adminProducts'))
+      } catch (error) {
+        console.error('Error accessing localStorage:', error)
+      }
+    }
+  }, [])
+
+  // Listen for localStorage changes
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const updatedProducts = getProducts()
+      setCurrentProducts(updatedProducts)
+    }
+
+    const handleCategoriesChange = () => {
+      const updatedCategories = getCategories()
+      setCategories(updatedCategories)
+    }
+
+    window.addEventListener('storage', handleStorageChange)
+    
+    // Also listen for custom events (for same-tab updates)
+    window.addEventListener('adminProductsUpdated', handleStorageChange)
+    window.addEventListener('adminCategoriesUpdated', handleCategoriesChange)
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+      window.removeEventListener('adminProductsUpdated', handleStorageChange)
+      window.removeEventListener('adminCategoriesUpdated', handleCategoriesChange)
     }
   }, [])
 
@@ -161,42 +255,17 @@ export default function DopeTechEcommerce() {
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      // Force dark mode
-      document.documentElement.classList.add("dark")
-      localStorage.setItem("theme", "dark")
-    }
-  }, [])
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // Check admin authentication
-      const checkAdminAuth = () => {
-        const isAdmin = localStorage.getItem("adminAuthenticated") === "true"
-        const loginTime = localStorage.getItem("adminLoginTime")
-        
-        if (isAdmin && loginTime) {
-          const loginDate = new Date(loginTime)
-          const now = new Date()
-          const hoursSinceLogin = (now.getTime() - loginDate.getTime()) / (1000 * 60 * 60)
-          
-          if (hoursSinceLogin < 8) {
-            setIsAdmin(true)
-          } else {
-            localStorage.removeItem("adminAuthenticated")
-            localStorage.removeItem("adminLoginTime")
-            setIsAdmin(false)
-          }
-        } else {
-          setIsAdmin(false)
-        }
+      try {
+        // Force dark mode
+        document.documentElement.classList.add("dark")
+        localStorage.setItem("theme", "dark")
+      } catch (error) {
+        console.error('Error setting theme:', error)
       }
-
-      checkAdminAuth()
-      // Check every minute
-      const interval = setInterval(checkAdminAuth, 60000)
-      return () => clearInterval(interval)
     }
   }, [])
+
+
 
   // DopeTech animation restart effect
   useEffect(() => {
@@ -270,6 +339,8 @@ export default function DopeTechEcommerce() {
     ))
   }
 
+
+
   const getCartTotal = () => {
     return cart.reduce((total, item) => total + (item.price * item.quantity), 0)
   }
@@ -290,7 +361,7 @@ export default function DopeTechEcommerce() {
   }
 
   const filteredProducts = useMemo(() => {
-    return products.filter(product => {
+    return currentProducts.filter(product => {
       const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            product.description.toLowerCase().includes(searchQuery.toLowerCase())
       
@@ -303,22 +374,130 @@ export default function DopeTechEcommerce() {
       const matchesCategory = selectedCategory === "all" || product.category === selectedCategory
       return matchesCategory
     })
-  }, [searchQuery, selectedCategory])
+  }, [currentProducts, searchQuery, selectedCategory])
 
   // Debug logging
   console.log("Search query:", searchQuery)
   console.log("Selected category:", selectedCategory)
   console.log("Filtered products count:", filteredProducts.length)
 
-  const categories = [
+  // Get categories from localStorage or use defaults
+  // SVG Icon Component
+  const SvgIcon = ({ svgContent, className }: { svgContent: string, className?: string }) => (
+    <div 
+      className={className}
+      dangerouslySetInnerHTML={{ __html: svgContent }}
+      style={{ 
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        color: 'currentColor'
+      }}
+    />
+  )
+
+  // Type for category icons
+  type CategoryIcon = React.ComponentType<{ className?: string }> | { type: 'svg', content: string }
+
+  // Helper function to render category icons
+  const renderCategoryIcon = (icon: any, className: string) => {
+    if (typeof icon === 'object' && 'type' in icon && icon.type === 'svg') {
+      return <SvgIcon svgContent={icon.content} className={className} />
+    }
+    return <icon className={className} />
+  }
+
+  const getCategories = () => {
+    if (typeof window !== 'undefined') {
+      try {
+        const adminCategories = localStorage.getItem('adminCategories')
+        console.log('Raw admin categories from localStorage:', adminCategories)
+        if (adminCategories) {
+          try {
+            const parsed = JSON.parse(adminCategories)
+            console.log('Parsed admin categories:', parsed)
+            // Add icons to categories
+            const result = parsed.map((cat: any) => {
+              console.log('Processing category:', cat)
+              // If category has a custom icon, use it
+              if (cat.icon && cat.icon !== "Grid") {
+                console.log('Category has custom icon:', cat.icon)
+                if (cat.icon.startsWith('<svg')) {
+                  console.log('Icon is SVG, creating SVG object')
+                  // Return SVG content as a special object that will be handled by SvgIcon
+                  return {
+                    ...cat,
+                    icon: { type: 'svg', content: cat.icon }
+                  }
+                } else {
+                  console.log('Icon is Lucide name, mapping to component')
+                  // Map common Lucide icon names to components
+                  const iconComponent = 
+                    cat.icon === "Gamepad2" ? Gamepad2 :
+                    cat.icon === "Laptop" ? Laptop :
+                    cat.icon === "Smartphone" ? Smartphone :
+                    cat.icon === "Headphones" ? Headphones :
+                    cat.icon === "Speaker" ? Speaker :
+                    cat.icon === "Monitor" ? Monitor :
+                    cat.icon === "Cable" ? Cable :
+                    cat.icon === "Keyboard" ? Keyboard :
+                    cat.icon === "Mouse" ? Mouse :
+                    cat.icon === "Camera" ? Camera :
+                    Grid // Default fallback
+                  
+                  return {
+                    ...cat,
+                    icon: iconComponent
+                  }
+                }
+              }
+              
+              console.log('Using default icon mapping for category:', cat.id)
+              // Use default icon mapping for existing categories
+              return {
+                ...cat,
+                icon: cat.id === "all" ? Grid :
+                      cat.id === "keyboard" ? Keyboard :
+                      cat.id === "mouse" ? Mouse :
+                      cat.id === "audio" ? Headphones :
+                      cat.id === "speaker" ? Speaker :
+                      cat.id === "monitor" ? Camera :
+                      cat.id === "accessory" ? Cable : Grid
+              }
+            })
+            console.log('Final processed categories:', result)
+            return result
+          } catch (e) {
+            console.error('Error parsing admin categories:', e)
+          }
+        }
+      } catch (error) {
+        console.error('Error accessing localStorage:', error)
+      }
+    }
+    console.log('Using default categories')
+    return [
+      { id: "all", name: "All Products", icon: Grid },
+      { id: "keyboard", name: "Keyboards", icon: Keyboard },
+      { id: "mouse", name: "Mouse", icon: Mouse },
+      { id: "audio", name: "Audio", icon: Headphones },
+      { id: "speaker", name: "Speakers", icon: Speaker },
+      { id: "monitor", name: "Monitors", icon: Camera },
+      { id: "accessory", name: "Accessories", icon: Cable },
+    ]
+  }
+
+  const [categories, setCategories] = useState([
     { id: "all", name: "All Products", icon: Grid },
     { id: "keyboard", name: "Keyboards", icon: Keyboard },
-    { id: "mouse", name: "Mice", icon: Mouse },
+    { id: "mouse", name: "Mouse", icon: Mouse },
     { id: "audio", name: "Audio", icon: Headphones },
     { id: "speaker", name: "Speakers", icon: Speaker },
     { id: "monitor", name: "Monitors", icon: Camera },
     { id: "accessory", name: "Accessories", icon: Cable },
-  ]
+  ])
+
+
 
   return (
     <>
@@ -344,12 +523,7 @@ export default function DopeTechEcommerce() {
             <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-3 min-w-0 flex-1">
               <img src="/images/dtechnepal.svg" alt="DopeTech" className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 logo-adaptive flex-shrink-0" />
 
-              {isAdmin && (
-                <div className="flex items-center space-x-1 ml-1 sm:ml-2 flex-shrink-0">
-                  <Shield className="w-2 h-2 sm:w-3 sm:h-3 md:w-4 md:h-4 text-[#F7DD0F]" />
-                  <span className="text-xs sm:text-sm text-[#F7DD0F] font-medium">ADMIN</span>
-                </div>
-              )}
+
             </div>
 
             {/* Right Side - Controls */}
@@ -390,6 +564,8 @@ export default function DopeTechEcommerce() {
               >
                 <Instagram className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 hover:text-[#F7DD0F] transition-colors" />
               </a>
+
+
 
               {/* Mobile Menu Toggle */}
               <button
@@ -465,7 +641,14 @@ export default function DopeTechEcommerce() {
                     }`}
                     style={{ minHeight: '44px' }}
                   >
-                    <category.icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                    {typeof category.icon === 'object' && 'type' in category.icon && category.icon.type === 'svg' ? (
+                      <SvgIcon 
+                        svgContent={(category.icon as { type: 'svg', content: string }).content} 
+                        className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" 
+                      />
+                    ) : (
+                      <category.icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                    )}
                     <span className="font-medium text-sm sm:text-base">{category.name}</span>
                   </button>
                 ))}
@@ -487,32 +670,39 @@ export default function DopeTechEcommerce() {
               Premium Tech Gear from <span className="text-[#F7DD0F] animate-float">DopeTech</span> Nepal
             </p>
             
-            {/* Autoplay GIF with Borderless Glow - Shorter on Mobile */}
-            <div className="w-full max-w-4xl mx-auto mb-6 sm:mb-8 md:mb-10 animate-fade-in-up stagger-3 borderless-glow">
+            {/* Autoplay GIF with Borderless Glow - Larger on Mobile */}
+            <div className="w-full max-w-5xl mx-auto mb-6 sm:mb-8 md:mb-10 animate-fade-in-up stagger-3 borderless-glow">
               <img
                 src="/gif/doptechgif.gif"
                 alt="DopeTech Introduction"
-                className="w-full h-24 sm:h-32 md:h-40 lg:h-48 rounded-xl shadow-xl object-cover object-center"
+                className="w-full h-48 sm:h-40 md:h-48 lg:h-56 xl:h-64 rounded-xl shadow-xl object-cover object-center"
                 loading="lazy"
               />
             </div>
 
-            {/* Category Filter - Mobile Optimized with Larger Touch Targets */}
-            <div className="flex flex-wrap justify-center gap-3 sm:gap-4 md:gap-5 mb-6 sm:mb-8 md:mb-10 px-2 animate-fade-in-up stagger-4">
+            {/* Category Filter - Mobile Optimized with Smaller Touch Targets */}
+            <div className="flex flex-wrap justify-center gap-2 sm:gap-3 md:gap-4 mb-6 sm:mb-8 md:mb-10 px-2 animate-fade-in-up stagger-4">
               {/* First row */}
-              <div className="flex flex-wrap justify-center gap-3 sm:gap-4 md:gap-5 w-full">
+              <div className="flex flex-wrap justify-center gap-2 sm:gap-3 md:gap-4 w-full">
                 {categories.slice(0, 3).map((category, index) => (
                   <div key={category.id} className="relative animate-fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
                     <button
                       onClick={() => handleCategoryClick(category.id)}
-                      className={`flex items-center space-x-2 px-4 sm:px-5 md:px-6 py-3 sm:py-4 md:py-5 rounded-full transition-all duration-200 cursor-pointer text-sm sm:text-base md:text-lg touch-target hover-scale hover-glow min-h-[44px] ${
+                      className={`flex items-center space-x-1.5 px-3 sm:px-4 md:px-5 py-2 sm:py-3 md:py-4 rounded-full transition-all duration-200 cursor-pointer text-xs sm:text-sm md:text-base touch-target hover-scale hover-glow min-h-[36px] ${
                         selectedCategory === category.id
                           ? "bg-[#F7DD0F] text-black shadow-lg animate-pulse font-bold"
                           : "bg-white/10 backdrop-blur-sm border border-gray-200 dark:border-gray-700 hover:bg-[#F7DD0F]/10 font-medium"
                       }`}
                       aria-label={`Filter by ${category.name}`}
                     >
-                      <category.icon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+                      {typeof category.icon === 'object' && 'type' in category.icon && category.icon.type === 'svg' ? (
+                        <SvgIcon 
+                          svgContent={(category.icon as { type: 'svg', content: string }).content} 
+                          className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" 
+                        />
+                      ) : (
+                        <category.icon className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" />
+                      )}
                       <span>{category.name}</span>
                     </button>
                   </div>
@@ -523,19 +713,26 @@ export default function DopeTechEcommerce() {
               <div className="w-full h-px bg-gradient-to-r from-transparent via-gray-600 to-transparent my-2 sm:my-3 opacity-50"></div>
               
               {/* Second row */}
-              <div className="flex flex-wrap justify-center gap-3 sm:gap-4 md:gap-5 w-full">
+              <div className="flex flex-wrap justify-center gap-2 sm:gap-3 md:gap-4 w-full">
                 {categories.slice(3).map((category, index) => (
                   <div key={category.id} className="relative animate-fade-in-up" style={{ animationDelay: `${(index + 3) * 0.1}s` }}>
                     <button
                       onClick={() => handleCategoryClick(category.id)}
-                      className={`flex items-center space-x-2 px-4 sm:px-5 md:px-6 py-3 sm:py-4 md:py-5 rounded-full transition-all duration-200 cursor-pointer text-sm sm:text-base md:text-lg touch-target hover-scale hover-glow min-h-[44px] ${
+                      className={`flex items-center space-x-1.5 px-3 sm:px-4 md:px-5 py-2 sm:py-3 md:py-4 rounded-full transition-all duration-200 cursor-pointer text-xs sm:text-sm md:text-base touch-target hover-scale hover-glow min-h-[36px] ${
                         selectedCategory === category.id
                           ? "bg-[#F7DD0F] text-black shadow-lg animate-pulse font-bold"
                           : "bg-white/10 backdrop-blur-sm border border-gray-200 dark:border-gray-700 hover:bg-[#F7DD0F]/10 font-medium"
                       }`}
                       aria-label={`Filter by ${category.name}`}
                     >
-                      <category.icon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+                      {typeof category.icon === 'object' && 'type' in category.icon && category.icon.type === 'svg' ? (
+                        <SvgIcon 
+                          svgContent={(category.icon as { type: 'svg', content: string }).content} 
+                          className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" 
+                        />
+                      ) : (
+                        <category.icon className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" />
+                      )}
                       <span>{category.name}</span>
                     </button>
                   </div>
@@ -852,6 +1049,8 @@ export default function DopeTechEcommerce() {
           </div>
         </div>
       </footer>
+
+
 
       {/* AI Chat Assistant */}
       <AIChatAssistant
