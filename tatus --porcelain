@@ -1,0 +1,5 @@
+[33mf8d0f16[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Update README and project files
+[33m2af67b0[m Fix pnpm lockfile and update build command to use pnpm
+[33m5126e6d[m Fix dependency installation and build configuration issues
+[33m28b7b8a[m Add critters dependency to fix build error
+[33m407e89e[m Add smooth category navigation with proper scroll offset

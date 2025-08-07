@@ -253,6 +253,9 @@ export default function DopeTechAdmin() {
 
   const [searchQuery, setSearchQuery] = useState("")
   const [isAddingProduct, setIsAddingProduct] = useState(false)
+  const [gifFile, setGifFile] = useState<File | null>(null)
+  const [gifUrl, setGifUrl] = useState("")
+  const [isUploadingGif, setIsUploadingGif] = useState(false)
 
   const [analytics, setAnalytics] = useState<Analytics>({
     totalProducts: allProducts.length,
@@ -483,6 +486,83 @@ export default function DopeTechAdmin() {
     }
   }
 
+  const handleGifFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      if (file.type === 'image/gif') {
+        if (file.size <= 10 * 1024 * 1024) { // 10MB limit
+          setGifFile(file)
+          setGifUrl("") // Clear URL when file is selected
+        } else {
+          alert("File size must be less than 10MB")
+        }
+      } else {
+        alert("Please select a GIF file")
+      }
+    }
+  }
+
+  const handleGifUpload = async () => {
+    if (!gifFile && !gifUrl) {
+      alert("Please select a GIF file or enter a URL")
+      return
+    }
+
+    setIsUploadingGif(true)
+    
+    try {
+      let gifPath = ""
+      
+      if (gifFile) {
+        // For file upload, we'll simulate saving to localStorage
+        // In a real app, you'd upload to a server
+        const reader = new FileReader()
+        reader.onload = (e) => {
+          const result = e.target?.result as string
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('customGifData', result)
+            localStorage.setItem('customGifPath', '/gif/custom-gif.gif')
+            window.dispatchEvent(new Event('gifUpdated'))
+            alert("GIF uploaded successfully! The main site will now use your custom GIF.")
+          }
+        }
+        reader.readAsDataURL(gifFile)
+      } else if (gifUrl) {
+        // For URL, save the URL to localStorage
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('customGifUrl', gifUrl)
+          localStorage.setItem('customGifPath', gifUrl)
+          window.dispatchEvent(new Event('gifUpdated'))
+          alert("GIF URL saved successfully! The main site will now use your custom GIF.")
+        }
+      }
+      
+      // Reset form
+      setGifFile(null)
+      setGifUrl("")
+      const fileInput = document.getElementById('gif-upload') as HTMLInputElement
+      if (fileInput) fileInput.value = ""
+      
+    } catch (error) {
+      console.error("Error uploading GIF:", error)
+      alert("Error uploading GIF. Please try again.")
+    } finally {
+      setIsUploadingGif(false)
+    }
+  }
+
+  const handleResetGif = () => {
+    if (confirm("Are you sure you want to reset to the default GIF?")) {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('customGifData')
+        localStorage.removeItem('customGifUrl')
+        localStorage.removeItem('customGifPath')
+        window.dispatchEvent(new Event('gifUpdated'))
+        alert("GIF reset to default successfully!")
+      }
+    }
+  }
+
 
 
   // Debug log
@@ -586,22 +666,22 @@ export default function DopeTechAdmin() {
                 <span>Admin Mode</span>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <a 
-                href="/"
-                className="flex items-center space-x-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg transition-colors"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                <span>View Site</span>
-              </a>
-              <button
-                onClick={handleLogout}
-                className="flex items-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
-              >
-                <LogOut className="w-4 h-4" />
-                <span>Logout</span>
-              </button>
-            </div>
+                         <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+               <a 
+                 href="/"
+                 className="flex items-center justify-center space-x-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg transition-colors"
+               >
+                 <ArrowLeft className="w-4 h-4" />
+                 <span>View Site</span>
+               </a>
+                               <button
+                  onClick={handleLogout}
+                  className="flex items-center justify-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Logout</span>
+                </button>
+             </div>
           </div>
         </div>
       </header>
@@ -715,23 +795,111 @@ export default function DopeTechAdmin() {
 
          
 
-         {/* Product Management */}
-         <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-           <div className="flex items-center justify-between mb-6">
-             <h2 className="text-xl font-bold">Product Management</h2>
-             <div className="flex items-center space-x-4">
-               <button
-                 onClick={() => {
-                   console.log("Add Product button clicked")
-                   setIsAddingProduct(true)
-                 }}
-                 className="flex items-center space-x-2 px-4 py-2 bg-[#F7DD0F] text-black rounded-lg hover:bg-[#F7DD0F]/90 transition-colors"
-               >
-                 <Plus className="w-4 h-4" />
-                 <span>Add Product</span>
-               </button>
-             </div>
-           </div>
+                   {/* GIF Management */}
+          <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-8">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold">GIF Management</h2>
+              <div className="flex items-center space-x-2">
+                <ImageIcon className="w-5 h-5 text-[#F7DD0F]" />
+                <span className="text-sm text-gray-400">Main Site GIF</span>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Current GIF Preview */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Current GIF</h3>
+                <div className="bg-gray-700 rounded-lg p-4">
+                  <img 
+                    src="/gif/doptechgif.gif" 
+                    alt="Current Main GIF" 
+                    className="w-full h-32 object-cover rounded-lg"
+                  />
+                  <p className="text-sm text-gray-400 mt-2">Path: /gif/doptechgif.gif</p>
+                </div>
+              </div>
+              
+              {/* Upload New GIF */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Upload New GIF</h3>
+                <div className="bg-gray-700 rounded-lg p-4">
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-2">GIF File</label>
+                      <div className="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center hover:border-[#F7DD0F] transition-colors">
+                        <Upload className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+                        <p className="text-sm text-gray-400 mb-2">Click to upload or drag and drop</p>
+                        <p className="text-xs text-gray-500">GIF files only, max 10MB</p>
+                        <input 
+                          type="file" 
+                          accept=".gif"
+                          className="hidden"
+                          id="gif-upload"
+                          onChange={handleGifFileChange}
+                        />
+                        <label 
+                          htmlFor="gif-upload"
+                          className="inline-block px-4 py-2 bg-[#F7DD0F] text-black rounded-lg hover:bg-[#F7DD0F]/90 transition-colors cursor-pointer mt-2"
+                        >
+                          Choose File
+                        </label>
+                        {gifFile && (
+                          <p className="text-sm text-[#F7DD0F] mt-2">
+                            Selected: {gifFile.name} ({(gifFile.size / 1024 / 1024).toFixed(2)}MB)
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium mb-2">GIF URL (Alternative)</label>
+                      <input
+                        type="text"
+                        placeholder="https://example.com/your-gif.gif"
+                        value={gifUrl}
+                        onChange={(e) => setGifUrl(e.target.value)}
+                        className="w-full px-3 py-2 bg-gray-600 border border-gray-500 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F7DD0F]"
+                      />
+                    </div>
+                    
+                    <div className="flex space-x-3">
+                      <button 
+                        onClick={handleGifUpload}
+                        disabled={isUploadingGif || (!gifFile && !gifUrl)}
+                        className="flex-1 px-4 py-2 bg-[#F7DD0F] text-black rounded-lg hover:bg-[#F7DD0F]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isUploadingGif ? "Uploading..." : "Upload & Replace"}
+                      </button>
+                      <button 
+                        onClick={handleResetGif}
+                        className="flex-1 px-4 py-2 bg-gray-600 rounded-lg hover:bg-gray-700 transition-colors"
+                      >
+                        Reset to Default
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Product Management */}
+          <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold">Product Management</h2>
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={() => {
+                    console.log("Add Product button clicked")
+                    setIsAddingProduct(true)
+                  }}
+                  className="flex items-center space-x-2 px-4 py-2 bg-[#F7DD0F] text-black rounded-lg hover:bg-[#F7DD0F]/90 transition-colors"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add Product</span>
+                </button>
+              </div>
+            </div>
 
                      {/* Search */}
            <div className="mb-6">
@@ -889,120 +1057,215 @@ export default function DopeTechAdmin() {
             </div>
           )}
 
-          {/* Products Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-700">
-                  <th className="text-left py-3 px-4">Product</th>
-                  <th className="text-left py-3 px-4">Category</th>
-                  <th className="text-left py-3 px-4">Price</th>
-                  <th className="text-left py-3 px-4">Rating</th>
-                  <th className="text-left py-3 px-4">Stock</th>
-                  <th className="text-left py-3 px-4">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredProducts.map((product) => (
-                  <React.Fragment key={product.id}>
-                    <tr className="border-b border-gray-700 hover:bg-gray-700/50">
-                      <td className="py-3 px-4">
-                        <div className="flex items-center space-x-3">
-                          <img src={product.image} alt={product.name} className="w-10 h-10 rounded object-cover" />
-                          <div>
-                            <p className="font-medium">{product.name}</p>
-                            <p className="text-gray-400 text-sm">{product.description}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <span className="px-2 py-1 bg-gray-700 rounded text-xs">{product.category}</span>
-                      </td>
-                      <td className="py-3 px-4">
-                        <div>
-                          <p className="font-medium">Rs {product.price}</p>
-                          {product.originalPrice > product.price && (
-                            <p className="text-gray-400 text-sm line-through">Rs {product.originalPrice}</p>
-                          )}
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="flex items-center space-x-1">
-                          <Star className="w-4 h-4 text-[#F7DD0F] fill-current" />
-                          <span>{product.rating}</span>
-                          <span className="text-gray-400">({product.reviews})</span>
-                        </div>
-                      </td>
-                      <td className="py-3 px-4">
+          {/* Products Display */}
+          <div className="space-y-4">
+            {/* Desktop Table - Hidden on mobile */}
+            <div className="hidden lg:block">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-700">
+                      <th className="text-left py-3 px-4">Product</th>
+                      <th className="text-left py-3 px-4">Category</th>
+                      <th className="text-left py-3 px-4">Price</th>
+                      <th className="text-left py-3 px-4">Rating</th>
+                      <th className="text-left py-3 px-4">Stock</th>
+                      <th className="text-left py-3 px-4">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredProducts.map((product) => (
+                      <React.Fragment key={product.id}>
+                        <tr className="border-b border-gray-700 hover:bg-gray-700/50">
+                          <td className="py-3 px-4">
+                            <div className="flex items-center space-x-3">
+                              <img src={product.image} alt={product.name} className="w-10 h-10 rounded object-cover" />
+                              <div>
+                                <p className="font-medium">{product.name}</p>
+                                <p className="text-gray-400 text-sm">{product.description}</p>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className="px-2 py-1 bg-gray-700 rounded text-xs">{product.category}</span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <div>
+                              <p className="font-medium">Rs {product.price}</p>
+                              {product.originalPrice > product.price && (
+                                <p className="text-gray-400 text-sm line-through">Rs {product.originalPrice}</p>
+                              )}
+                            </div>
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="flex items-center space-x-1">
+                              <Star className="w-4 h-4 text-[#F7DD0F] fill-current" />
+                              <span>{product.rating}</span>
+                              <span className="text-gray-400">({product.reviews})</span>
+                            </div>
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className={`px-2 py-1 rounded text-xs ${
+                              product.inStock ? 'bg-green-600' : 'bg-red-600'
+                            }`}>
+                              {product.inStock ? 'In Stock' : 'Out of Stock'}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            <div className="flex items-center space-x-2">
+                              <button
+                                onClick={() => handleEditProduct(product.id)}
+                                className="p-1 text-blue-400 hover:text-blue-300"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteProduct(product.id)}
+                                className="p-1 text-red-400 hover:text-red-300"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                        
+                        {/* Edit Product Form */}
+                        {product.isEditing && (
+                          <tr key={`edit-${product.id}`} className="bg-gray-700/50">
+                            <td colSpan={6} className="py-4 px-4">
+                              <div className="bg-gray-800 rounded-lg p-4 border border-gray-600">
+                                <div className="flex items-center justify-between mb-4">
+                                  <h4 className="text-lg font-semibold">Edit Product</h4>
+                                  <button
+                                    onClick={() => handleEditProduct(product.id)}
+                                    className="text-gray-400 hover:text-white"
+                                  >
+                                    <X className="w-5 h-5" />
+                                  </button>
+                                </div>
+                                
+                                <EditProductForm 
+                                  product={product}
+                                  onSave={(updatedData) => {
+                                    handleSaveProduct(product.id, updatedData)
+                                    if (product.id > 5) {
+                                      const updatedProducts = products.map(p => 
+                                        p.id === product.id ? { ...p, ...updatedData, isEditing: false } : p
+                                      )
+                                      const adminAddedProducts = updatedProducts.filter(p => p.id > 5)
+                                      if (typeof window !== 'undefined') {
+                                        try {
+                                          localStorage.setItem('adminProducts', JSON.stringify(adminAddedProducts))
+                                          window.dispatchEvent(new Event('adminProductsUpdated'))
+                                        } catch (error) {
+                                          console.error("Error saving admin products:", error)
+                                        }
+                                      }
+                                    }
+                                  }}
+                                  onCancel={() => handleEditProduct(product.id)}
+                                />
+                              </div>
+                            </td>
+                          </tr>
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Mobile Product Cards - No horizontal scroll */}
+            <div className="lg:hidden space-y-4">
+              {filteredProducts.map((product) => (
+                <div key={product.id} className="bg-gray-700 rounded-lg p-4 border border-gray-600">
+                  <div className="flex items-start space-x-3 mb-3">
+                    <img src={product.image} alt={product.name} className="w-16 h-16 rounded object-cover flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-medium text-sm mb-1 truncate">{product.name}</h3>
+                      <p className="text-gray-400 text-xs mb-2 line-clamp-2">{product.description}</p>
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
+                        <span className="px-2 py-1 bg-gray-600 rounded text-xs">{product.category}</span>
                         <span className={`px-2 py-1 rounded text-xs ${
                           product.inStock ? 'bg-green-600' : 'bg-red-600'
                         }`}>
                           {product.inStock ? 'In Stock' : 'Out of Stock'}
                         </span>
-                      </td>
-                      <td className="py-3 px-4">
-                        <div className="flex items-center space-x-2">
-                          <button
-                            onClick={() => handleEditProduct(product.id)}
-                            className="p-1 text-blue-400 hover:text-blue-300"
-                          >
-                            <Edit className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteProduct(product.id)}
-                            className="p-1 text-red-400 hover:text-red-300"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                    
-                    {/* Edit Product Form */}
-                    {product.isEditing && (
-                      <tr key={`edit-${product.id}`} className="bg-gray-700/50">
-                        <td colSpan={6} className="py-4 px-4">
-                          <div className="bg-gray-800 rounded-lg p-4 border border-gray-600">
-                            <div className="flex items-center justify-between mb-4">
-                              <h4 className="text-lg font-semibold">Edit Product</h4>
-                              <button
-                                onClick={() => handleEditProduct(product.id)}
-                                className="text-gray-400 hover:text-white"
-                              >
-                                <X className="w-5 h-5" />
-                              </button>
-                            </div>
-                            
-                            <EditProductForm 
-                              product={product}
-                              onSave={(updatedData) => {
-                                handleSaveProduct(product.id, updatedData)
-                                // Save to localStorage for admin-added products
-                                if (product.id > 5) {
-                                  const updatedProducts = products.map(p => 
-                                    p.id === product.id ? { ...p, ...updatedData, isEditing: false } : p
-                                  )
-                                  const adminAddedProducts = updatedProducts.filter(p => p.id > 5)
-                                  if (typeof window !== 'undefined') {
-                                    try {
-                                      localStorage.setItem('adminProducts', JSON.stringify(adminAddedProducts))
-                                      window.dispatchEvent(new Event('adminProductsUpdated'))
-                                    } catch (error) {
-                                      console.error("Error saving admin products:", error)
-                                    }
-                                  }
-                                }
-                              }}
-                              onCancel={() => handleEditProduct(product.id)}
-                            />
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </React.Fragment>
-                ))}
-              </tbody>
-            </table>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-between mb-3">
+                    <div>
+                      <p className="font-medium text-sm">Rs {product.price}</p>
+                      {product.originalPrice > product.price && (
+                        <p className="text-gray-400 text-xs line-through">Rs {product.originalPrice}</p>
+                      )}
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <Star className="w-4 h-4 text-[#F7DD0F] fill-current" />
+                      <span className="text-sm">{product.rating}</span>
+                      <span className="text-gray-400 text-xs">({product.reviews})</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center justify-end space-x-2">
+                    <button
+                      onClick={() => handleEditProduct(product.id)}
+                      className="flex items-center space-x-1 px-3 py-1 text-blue-400 hover:text-blue-300 text-xs"
+                    >
+                      <Edit className="w-3 h-3" />
+                      <span>Edit</span>
+                    </button>
+                    <button
+                      onClick={() => handleDeleteProduct(product.id)}
+                      className="flex items-center space-x-1 px-3 py-1 text-red-400 hover:text-red-300 text-xs"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                      <span>Delete</span>
+                    </button>
+                  </div>
+                  
+                  {/* Edit Product Form for Mobile */}
+                  {product.isEditing && (
+                    <div className="mt-4 bg-gray-800 rounded-lg p-4 border border-gray-600">
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-base font-semibold">Edit Product</h4>
+                        <button
+                          onClick={() => handleEditProduct(product.id)}
+                          className="text-gray-400 hover:text-white"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                      
+                      <EditProductForm 
+                        product={product}
+                        onSave={(updatedData) => {
+                          handleSaveProduct(product.id, updatedData)
+                          if (product.id > 5) {
+                            const updatedProducts = products.map(p => 
+                              p.id === product.id ? { ...p, ...updatedData, isEditing: false } : p
+                            )
+                            const adminAddedProducts = updatedProducts.filter(p => p.id > 5)
+                            if (typeof window !== 'undefined') {
+                              try {
+                                localStorage.setItem('adminProducts', JSON.stringify(adminAddedProducts))
+                                window.dispatchEvent(new Event('adminProductsUpdated'))
+                              } catch (error) {
+                                console.error("Error saving admin products:", error)
+                              }
+                            }
+                          }
+                        }}
+                        onCancel={() => handleEditProduct(product.id)}
+                      />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

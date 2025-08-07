@@ -165,16 +165,23 @@ export default function DopeTechEcommerce() {
       setCategories(updatedCategories)
     }
 
+    const handleGifChange = () => {
+      // Force re-render to update GIF
+      setAnimationKey(prev => prev + 1)
+    }
+
     window.addEventListener('storage', handleStorageChange)
     
     // Also listen for custom events (for same-tab updates)
     window.addEventListener('adminProductsUpdated', handleStorageChange)
     window.addEventListener('adminCategoriesUpdated', handleCategoriesChange)
+    window.addEventListener('gifUpdated', handleGifChange)
     
     return () => {
       window.removeEventListener('storage', handleStorageChange)
       window.removeEventListener('adminProductsUpdated', handleStorageChange)
       window.removeEventListener('adminCategoriesUpdated', handleCategoriesChange)
+      window.removeEventListener('gifUpdated', handleGifChange)
     }
   }, [])
 
@@ -673,10 +680,26 @@ export default function DopeTechEcommerce() {
             {/* Autoplay GIF with Borderless Glow - Larger on Mobile */}
             <div className="w-full max-w-5xl mx-auto mb-6 sm:mb-8 md:mb-10 animate-fade-in-up stagger-3 borderless-glow">
               <img
-                src="/gif/doptechgif.gif"
+                src={(() => {
+                  if (typeof window !== 'undefined') {
+                    const customGifPath = localStorage.getItem('customGifPath')
+                    const customGifData = localStorage.getItem('customGifData')
+                    const customGifUrl = localStorage.getItem('customGifUrl')
+                    
+                    if (customGifData) {
+                      return customGifData
+                    } else if (customGifUrl) {
+                      return customGifUrl
+                    } else if (customGifPath && customGifPath !== '/gif/doptechgif.gif') {
+                      return customGifPath
+                    }
+                  }
+                  return "/gif/doptechgif.gif"
+                })()}
                 alt="DopeTech Introduction"
                 className="w-full h-48 sm:h-40 md:h-48 lg:h-56 xl:h-64 rounded-xl shadow-xl object-cover object-center"
                 loading="lazy"
+                key={animationKey}
               />
             </div>
 
