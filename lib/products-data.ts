@@ -68,7 +68,8 @@ const originalProducts = [
     description: "Biometric security key for enhanced protection",
     features: ["Fingerprint Sensor", "NFC", "Water Resistant"],
     inStock: true,
-    discount: 17
+    discount: 17,
+    hiddenOnHome: true
   }
 ];
 
@@ -92,4 +93,5 @@ export interface Product {
   features: string[];
   inStock: boolean;
   discount: number;
+  hiddenOnHome?: boolean;
 } 

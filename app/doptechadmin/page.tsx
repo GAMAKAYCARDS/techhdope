@@ -8,24 +8,17 @@ import {
   Search, 
   Filter, 
   BarChart3, 
-  Users, 
-  ShoppingCart, 
   TrendingUp, 
   Eye,
   Star,
   DollarSign,
   Package,
-  Settings,
   LogOut,
   Save,
   X,
   Upload,
   Image as ImageIcon,
-  Tag,
-  DollarSign as PriceIcon,
-  FileText,
   CheckCircle,
-  AlertCircle,
   Lock,
   ArrowLeft
 } from "lucide-react"
@@ -244,7 +237,7 @@ export default function DopeTechAdmin() {
         }
         
         setProducts(result)
-        console.log('Loaded products from localStorage:', result)
+  
       } catch (error) {
         console.error('Error loading products from localStorage:', error)
       }
@@ -315,28 +308,21 @@ export default function DopeTechAdmin() {
         const isAdmin = localStorage.getItem("adminAuthenticated") === "true"
         const loginTime = localStorage.getItem("adminLoginTime")
         
-        console.log("Checking admin session:", { isAdmin, loginTime })
-        
         if (isAdmin && loginTime) {
           const loginDate = new Date(loginTime)
           const now = new Date()
           const hoursSinceLogin = (now.getTime() - loginDate.getTime()) / (1000 * 60 * 60)
           
-          console.log("Hours since login:", hoursSinceLogin)
-          
           if (hoursSinceLogin < 8) {
             setIsAuthenticated(true)
-            console.log("Valid session found, authenticated")
           } else {
             localStorage.removeItem("adminAuthenticated")
             localStorage.removeItem("adminLoginTime")
             setIsAuthenticated(false)
-            console.log("Session expired, logged out")
           }
         } else {
           // Ensure we're not authenticated if no valid session
           setIsAuthenticated(false)
-          console.log("No valid session found, showing login")
         }
       } catch (error) {
         console.error("Error checking admin session:", error)
@@ -360,14 +346,13 @@ export default function DopeTechAdmin() {
         try {
           localStorage.setItem("adminAuthenticated", "true")
           localStorage.setItem("adminLoginTime", new Date().toISOString())
-          console.log("Admin login successful")
+
         } catch (error) {
           console.error("Error saving admin session:", error)
         }
       }
     } else {
       alert("Invalid admin password!")
-      console.log("Admin login failed - invalid password")
     }
   }
 
@@ -384,13 +369,11 @@ export default function DopeTechAdmin() {
   }
 
   const handleAddProduct = () => {
-    console.log("Adding product:", newProduct)
     const product: AdminProduct = {
       id: Date.now(),
       ...newProduct,
       isNew: true
     }
-    console.log("Created product:", product)
     
     // Update local state
     const updatedProducts = [...products, product]
@@ -408,8 +391,6 @@ export default function DopeTechAdmin() {
       }
     }
     
-    console.log("Updated products list:", updatedProducts)
-    console.log("Admin products saved to localStorage:", adminAddedProducts)
     setNewProduct({
       name: "",
       price: 0,
@@ -424,15 +405,13 @@ export default function DopeTechAdmin() {
       discount: 0
     })
     setIsAddingProduct(false)
-    console.log("Product added successfully and saved to localStorage")
+
   }
 
   const handleEditProduct = (productId: number) => {
-    console.log("Editing product:", productId)
     setProducts(products.map(p => 
       p.id === productId ? { ...p, isEditing: !p.isEditing } : p
     ))
-    console.log("Updated products for editing")
   }
 
   const handleSaveProduct = (productId: number, updatedData: Partial<Product>) => {
@@ -454,7 +433,7 @@ export default function DopeTechAdmin() {
         
         // Dispatch custom event to notify main site
         window.dispatchEvent(new Event('adminProductsUpdated'))
-        console.log("Product saved to localStorage:", { adminAddedProducts, originalProductEdits })
+
       } catch (error) {
         console.error("Error saving admin products:", error)
       }
@@ -462,9 +441,7 @@ export default function DopeTechAdmin() {
   }
 
   const handleDeleteProduct = (productId: number) => {
-    console.log("Attempting to delete product:", productId)
     if (confirm("Are you sure you want to delete this product?")) {
-      console.log("Confirmed deletion")
       const updatedProducts = products.filter(p => p.id !== productId)
       setProducts(updatedProducts)
       
@@ -479,10 +456,6 @@ export default function DopeTechAdmin() {
           console.error("Error saving admin products:", error)
         }
       }
-      
-      console.log("Product deleted successfully and localStorage updated:", adminAddedProducts)
-    } else {
-      console.log("Deletion cancelled")
     }
   }
 
@@ -565,18 +538,11 @@ export default function DopeTechAdmin() {
 
 
 
-  // Debug log
-  console.log("Authentication state:", isAuthenticated)
-  console.log("Current products:", products)
-  console.log("Filtered products:", filteredProducts)
-  console.log("isAddingProduct:", isAddingProduct)
-  
   // Force authentication check - ensure we're not bypassing security
   if (typeof window !== 'undefined') {
     try {
       const storedAuth = localStorage.getItem("adminAuthenticated") === "true"
       if (!storedAuth && isAuthenticated) {
-        console.log("Security check failed - clearing authentication")
         setIsAuthenticated(false)
       }
     } catch (error) {
@@ -658,80 +624,88 @@ export default function DopeTechAdmin() {
       {/* Header */}
       <header className="bg-gray-800 border-b border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <h1 className="text-2xl font-bold text-[#F7DD0F]">DopeTech Admin</h1>
-              <div className="flex items-center space-x-2 text-sm text-gray-300">
-                <CheckCircle className="w-4 h-4 text-green-400" />
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-4 sm:space-y-0">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
+              <h1 className="text-xl sm:text-2xl font-bold text-[#F7DD0F]">DopeTech Admin</h1>
+              <div className="flex items-center space-x-2 text-xs sm:text-sm text-gray-300">
+                <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-green-400" />
                 <span>Admin Mode</span>
               </div>
             </div>
-                         <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
-               <a 
-                 href="/"
-                 className="flex items-center justify-center space-x-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg transition-colors"
-               >
-                 <ArrowLeft className="w-4 h-4" />
-                 <span>View Site</span>
-               </a>
-                               <button
-                  onClick={handleLogout}
-                  className="flex items-center justify-center space-x-2 px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span>Logout</span>
-                </button>
-             </div>
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
+              <a 
+                href="/"
+                className="flex items-center justify-center space-x-2 px-3 sm:px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg transition-colors text-sm"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>View Site</span>
+              </a>
+              <button
+                onClick={handleLogout}
+                className="flex items-center justify-center space-x-2 px-3 sm:px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors text-sm"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Logout</span>
+              </button>
+            </div>
           </div>
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Analytics Dashboard */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
+          <div className="bg-gradient-to-br from-gray-800 to-gray-700 rounded-xl p-4 sm:p-6 border border-gray-600 hover:border-[#F7DD0F]/30 transition-all duration-300 hover:shadow-lg hover:shadow-[#F7DD0F]/10">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-400 text-sm">Total Products</p>
-                <p className="text-2xl font-bold">{analytics.totalProducts}</p>
+                <p className="text-gray-400 text-xs sm:text-sm font-medium">Total Products</p>
+                <p className="text-xl sm:text-2xl font-bold text-white">{analytics.totalProducts}</p>
               </div>
-              <Package className="w-8 h-8 text-[#F7DD0F]" />
+              <div className="p-2 sm:p-3 bg-[#F7DD0F]/10 rounded-lg">
+                <Package className="w-6 h-6 sm:w-8 sm:h-8 text-[#F7DD0F]" />
+              </div>
             </div>
           </div>
 
-          <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+          <div className="bg-gradient-to-br from-gray-800 to-gray-700 rounded-xl p-4 sm:p-6 border border-gray-600 hover:border-green-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-green-500/10">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-400 text-sm">Total Sales</p>
-                <p className="text-2xl font-bold">Rs {analytics.totalSales.toLocaleString()}</p>
+                <p className="text-gray-400 text-xs sm:text-sm font-medium">Total Sales</p>
+                <p className="text-xl sm:text-2xl font-bold text-white">Rs {analytics.totalSales.toLocaleString()}</p>
               </div>
-              <DollarSign className="w-8 h-8 text-green-400" />
+              <div className="p-2 sm:p-3 bg-green-500/10 rounded-lg">
+                <DollarSign className="w-6 h-6 sm:w-8 sm:h-8 text-green-400" />
+              </div>
             </div>
           </div>
 
-          <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+          <div className="bg-gradient-to-br from-gray-800 to-gray-700 rounded-xl p-4 sm:p-6 border border-gray-600 hover:border-blue-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/10">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-400 text-sm">Total Views</p>
-                <p className="text-2xl font-bold">{analytics.totalViews.toLocaleString()}</p>
+                <p className="text-gray-400 text-xs sm:text-sm font-medium">Total Views</p>
+                <p className="text-xl sm:text-2xl font-bold text-white">{analytics.totalViews.toLocaleString()}</p>
               </div>
-              <Eye className="w-8 h-8 text-blue-400" />
+              <div className="p-2 sm:p-3 bg-blue-500/10 rounded-lg">
+                <Eye className="w-6 h-6 sm:w-8 sm:h-8 text-blue-400" />
+              </div>
             </div>
           </div>
 
-          <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+          <div className="bg-gradient-to-br from-gray-800 to-gray-700 rounded-xl p-4 sm:p-6 border border-gray-600 hover:border-purple-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/10">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-gray-400 text-sm">Interactions</p>
-                <p className="text-2xl font-bold">{analytics.totalInteractions.toLocaleString()}</p>
+                <p className="text-gray-400 text-xs sm:text-sm font-medium">Interactions</p>
+                <p className="text-xl sm:text-2xl font-bold text-white">{analytics.totalInteractions.toLocaleString()}</p>
               </div>
-              <TrendingUp className="w-8 h-8 text-purple-400" />
+              <div className="p-2 sm:p-3 bg-purple-500/10 rounded-lg">
+                <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-purple-400" />
+              </div>
             </div>
           </div>
         </div>
 
         {/* Top Products & Recent Activity */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 mb-6 sm:mb-8">
           {/* Top Products */}
           <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
             <h3 className="text-lg font-semibold mb-4 flex items-center space-x-2">
@@ -884,33 +858,32 @@ export default function DopeTechAdmin() {
           </div>
 
           {/* Product Management */}
-          <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold">Product Management</h2>
-              <div className="flex items-center space-x-4">
+          <div className="bg-gray-800 rounded-lg p-4 sm:p-6 border border-gray-700">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 space-y-3 sm:space-y-0">
+              <h2 className="text-lg sm:text-xl font-bold">Product Management</h2>
+              <div className="flex items-center space-x-2 sm:space-x-4">
                 <button
                   onClick={() => {
-                    console.log("Add Product button clicked")
                     setIsAddingProduct(true)
                   }}
-                  className="flex items-center space-x-2 px-4 py-2 bg-[#F7DD0F] text-black rounded-lg hover:bg-[#F7DD0F]/90 transition-colors"
+                  className="flex items-center space-x-2 px-3 sm:px-4 py-2 sm:py-3 bg-[#F7DD0F] text-black rounded-lg hover:bg-[#F7DD0F]/90 transition-all duration-200 hover:scale-105 shadow-lg hover:shadow-xl text-sm sm:text-base"
                 >
-                  <Plus className="w-4 h-4" />
-                  <span>Add Product</span>
+                  <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+                  <span className="font-medium">Add Product</span>
                 </button>
               </div>
             </div>
 
-                     {/* Search */}
-           <div className="mb-6">
+                     {/* Enhanced Search */}
+           <div className="mb-4 sm:mb-6">
              <div className="relative">
-               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
                <input
                  type="text"
                  placeholder="Search products..."
                  value={searchQuery}
                  onChange={(e) => setSearchQuery(e.target.value)}
-                 className="w-full pl-10 pr-4 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F7DD0F]"
+                 className="w-full pl-10 pr-4 py-2.5 sm:py-3 sm:py-4 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F7DD0F] focus:border-[#F7DD0F] transition-all duration-200 text-white placeholder-gray-400 text-sm sm:text-base"
                />
              </div>
            </div>
@@ -1059,6 +1032,101 @@ export default function DopeTechAdmin() {
 
           {/* Products Display */}
           <div className="space-y-4">
+            {/* Mobile Cards View */}
+            <div className="block lg:hidden space-y-4">
+              {filteredProducts.map((product) => (
+                <div key={product.id} className="bg-gray-700 rounded-lg p-4 border border-gray-600">
+                  <div className="flex items-start space-x-3 mb-3">
+                    <img src={product.image} alt={product.name} className="w-16 h-16 rounded object-cover flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-sm mb-1 truncate text-white">{product.name}</h3>
+                      <p className="text-gray-400 text-xs mb-3 line-clamp-2 leading-relaxed">{product.description}</p>
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        <span className="px-2 py-1 bg-[#F7DD0F]/20 text-[#F7DD0F] rounded-full text-xs font-medium border border-[#F7DD0F]/30">
+                          {product.category}
+                        </span>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium border ${
+                          product.inStock 
+                            ? 'bg-green-500/20 text-green-400 border-green-500/30' 
+                            : 'bg-red-500/20 text-red-400 border-red-500/30'
+                        }`}>
+                          {product.inStock ? 'In Stock' : 'Out of Stock'}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <div className="flex items-center space-x-1">
+                            <Star className="w-3 h-3 text-[#F7DD0F] fill-current" />
+                            <span className="text-xs">{product.rating}</span>
+                            <span className="text-gray-400 text-xs">({product.reviews})</span>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-bold text-sm text-[#F7DD0F]">Rs {product.price}</p>
+                          {product.originalPrice > product.price && (
+                            <p className="text-gray-400 text-xs line-through">Rs {product.originalPrice}</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Mobile Actions */}
+                  <div className="flex items-center justify-end space-x-2 pt-3 border-t border-gray-600">
+                    <button
+                      onClick={() => handleEditProduct(product.id)}
+                      className="px-3 py-2 bg-blue-500/10 hover:bg-blue-500/20 rounded-lg transition-all duration-200 text-blue-400 text-sm"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteProduct(product.id)}
+                      className="px-3 py-2 bg-red-500/10 hover:bg-red-500/20 rounded-lg transition-all duration-200 text-red-400 text-sm"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                  
+                  {/* Edit Product Form - Mobile */}
+                  {product.isEditing && (
+                    <div className="mt-4 p-4 bg-gray-800 rounded-lg border border-gray-600">
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-base font-semibold">Edit Product</h4>
+                        <button
+                          onClick={() => handleEditProduct(product.id)}
+                          className="text-gray-400 hover:text-white"
+                        >
+                          <X className="w-5 h-5" />
+                        </button>
+                      </div>
+                      
+                      <EditProductForm 
+                        product={product}
+                        onSave={(updatedData) => {
+                          handleSaveProduct(product.id, updatedData)
+                          if (product.id > 5) {
+                            const updatedProducts = products.map(p => 
+                              p.id === product.id ? { ...p, ...updatedData, isEditing: false } : p
+                            )
+                            const adminAddedProducts = updatedProducts.filter(p => p.id > 5)
+                            if (typeof window !== 'undefined') {
+                              try {
+                                localStorage.setItem('adminProducts', JSON.stringify(adminAddedProducts))
+                                window.dispatchEvent(new Event('adminProductsUpdated'))
+                              } catch (error) {
+                                console.error("Error saving admin products:", error)
+                              }
+                            }
+                          }
+                        }}
+                        onCancel={() => handleEditProduct(product.id)}
+                      />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            
             {/* Desktop Table - Hidden on mobile */}
             <div className="hidden lg:block">
               <div className="overflow-x-auto">
@@ -1176,19 +1244,19 @@ export default function DopeTechAdmin() {
               </div>
             </div>
 
-            {/* Mobile Product Cards - No horizontal scroll */}
+            {/* Enhanced Mobile Product Cards */}
             <div className="lg:hidden space-y-4">
               {filteredProducts.map((product) => (
-                <div key={product.id} className="bg-gray-700 rounded-lg p-4 border border-gray-600">
-                  <div className="flex items-start space-x-3 mb-3">
-                    <img src={product.image} alt={product.name} className="w-16 h-16 rounded object-cover flex-shrink-0" />
+                <div key={product.id} className="bg-gradient-to-br from-gray-700 to-gray-600 rounded-xl p-4 border border-gray-600 hover:border-[#F7DD0F]/30 transition-all duration-300 hover:shadow-lg">
+                  <div className="flex items-start space-x-3 mb-4">
+                    <img src={product.image} alt={product.name} className="w-16 h-16 rounded-lg object-cover flex-shrink-0 shadow-md" />
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-medium text-sm mb-1 truncate">{product.name}</h3>
-                      <p className="text-gray-400 text-xs mb-2 line-clamp-2">{product.description}</p>
-                      <div className="flex flex-wrap items-center gap-2 mb-2">
-                        <span className="px-2 py-1 bg-gray-600 rounded text-xs">{product.category}</span>
-                        <span className={`px-2 py-1 rounded text-xs ${
-                          product.inStock ? 'bg-green-600' : 'bg-red-600'
+                      <h3 className="font-semibold text-sm mb-1 truncate text-white">{product.name}</h3>
+                      <p className="text-gray-400 text-xs mb-3 line-clamp-2 leading-relaxed">{product.description}</p>
+                      <div className="flex flex-wrap items-center gap-2 mb-3">
+                        <span className="px-2 py-1 bg-[#F7DD0F]/20 text-[#F7DD0F] rounded-full text-xs font-medium border border-[#F7DD0F]/30">{product.category}</span>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          product.inStock ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'
                         }`}>
                           {product.inStock ? 'In Stock' : 'Out of Stock'}
                         </span>
@@ -1196,16 +1264,16 @@ export default function DopeTechAdmin() {
                     </div>
                   </div>
                   
-                  <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center justify-between mb-4">
                     <div>
-                      <p className="font-medium text-sm">Rs {product.price}</p>
+                      <p className="font-bold text-sm text-[#F7DD0F]">Rs {product.price}</p>
                       {product.originalPrice > product.price && (
                         <p className="text-gray-400 text-xs line-through">Rs {product.originalPrice}</p>
                       )}
                     </div>
                     <div className="flex items-center space-x-1">
                       <Star className="w-4 h-4 text-[#F7DD0F] fill-current" />
-                      <span className="text-sm">{product.rating}</span>
+                      <span className="text-sm font-medium">{product.rating}</span>
                       <span className="text-gray-400 text-xs">({product.reviews})</span>
                     </div>
                   </div>
@@ -1213,14 +1281,14 @@ export default function DopeTechAdmin() {
                   <div className="flex items-center justify-end space-x-2">
                     <button
                       onClick={() => handleEditProduct(product.id)}
-                      className="flex items-center space-x-1 px-3 py-1 text-blue-400 hover:text-blue-300 text-xs"
+                      className="flex items-center space-x-1 px-3 py-2 text-blue-400 hover:text-blue-300 text-xs bg-blue-500/10 hover:bg-blue-500/20 rounded-lg transition-all duration-200"
                     >
                       <Edit className="w-3 h-3" />
                       <span>Edit</span>
                     </button>
                     <button
                       onClick={() => handleDeleteProduct(product.id)}
-                      className="flex items-center space-x-1 px-3 py-1 text-red-400 hover:text-red-300 text-xs"
+                      className="flex items-center space-x-1 px-3 py-2 text-red-400 hover:text-red-300 text-xs bg-red-500/10 hover:bg-red-500/20 rounded-lg transition-all duration-200"
                     >
                       <Trash2 className="w-3 h-3" />
                       <span>Delete</span>

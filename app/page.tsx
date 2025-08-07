@@ -9,19 +9,12 @@ import {
   Search,
   ShoppingBag,
   Camera,
-  ChevronDown,
   Cable,
-  Zap,
   Star,
-  Heart,
   Plus,
   Minus,
   X,
-  Filter,
   Grid,
-  List,
-  RefreshCw,
-  TrendingUp,
   Menu,
   Instagram,
   Gamepad2,
@@ -29,15 +22,10 @@ import {
   Smartphone,
   Monitor,
 } from "lucide-react"
-import DVDBouncer from "@/components/dvd-bouncer"
 import CursorTracker from "@/components/cursor-tracker"
-import AIChatAssistant from "@/components/ai-chat-assistant"
-import OptimizedProductCard from "@/components/optimized-product-card"
-import { GridSkeleton } from "@/components/ui/loading-skeleton"
+import LazyAIChat from "@/components/lazy-ai-chat"
 import SEOOptimizer, { defaultStructuredData } from "@/components/seo-optimizer"
 import { allProducts, type Product } from "@/lib/products-data"
-
-import { Shield, LogOut } from "lucide-react"
 
 // Product type is now imported from lib/products-data
 
@@ -55,8 +43,6 @@ const getProducts = (): Product[] => {
     try {
       const adminProducts = localStorage.getItem('adminProducts')
       const originalProductEdits = localStorage.getItem('originalProductEdits')
-      console.log('Checking localStorage for admin products:', adminProducts)
-      console.log('Checking localStorage for original product edits:', originalProductEdits)
       
       let result = [...allProducts]
       
@@ -64,7 +50,6 @@ const getProducts = (): Product[] => {
       if (originalProductEdits) {
         try {
           const parsedEdits = JSON.parse(originalProductEdits)
-          console.log('Parsed original product edits:', parsedEdits)
           // Replace original products with edited versions
           result = result.map(product => {
             const edit = parsedEdits.find((p: any) => p.id === product.id)
@@ -79,17 +64,14 @@ const getProducts = (): Product[] => {
       if (adminProducts) {
         try {
           const parsed = JSON.parse(adminProducts)
-          console.log('Parsed admin products:', parsed)
           // Only return admin-added products (those with IDs higher than original products)
           const adminAddedProducts = parsed.filter((p: any) => p.id > 5) // Original products have IDs 1-5
-          console.log('Filtered admin products (ID > 5):', adminAddedProducts)
           result = [...result, ...adminAddedProducts]
         } catch (e) {
           console.error('Error parsing admin products:', e)
         }
       }
       
-      console.log('Final products list:', result)
       return result
     } catch (error) {
       console.error('Error accessing localStorage:', error)
@@ -105,10 +87,15 @@ export default function DopeTechEcommerce() {
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [viewMode, setViewMode] = useState("grid")
   const [searchQuery, setSearchQuery] = useState("")
+  const [searchDraft, setSearchDraft] = useState("")
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [searchModalReady, setSearchModalReady] = useState(false)
   const [currentProducts, setCurrentProducts] = useState<Product[]>(allProducts)
+  const [showBackToCategories, setShowBackToCategories] = useState(false)
+  const [isCategoryInView, setIsCategoryInView] = useState(true)
+  const [categoryIconIndex, setCategoryIconIndex] = useState(0)
+  const [headerOffset, setHeaderOffset] = useState<number>(72)
 
   const [userBehavior, setUserBehavior] = useState({
     viewedProducts: [] as number[],
@@ -120,11 +107,13 @@ export default function DopeTechEcommerce() {
   const [animationKey, setAnimationKey] = useState(0)
   const [isLoading, setIsLoading] = useState(true)
   const searchModalRef = useRef<HTMLDivElement>(null)
+  const categorySectionRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const handleScroll = () => setScrollY(window.scrollY)
-      window.addEventListener("scroll", handleScroll)
+      // Use passive listener for better scroll perf
+      window.addEventListener("scroll", handleScroll, { passive: true } as any)
       
       // Simulate loading completion
       const timer = setTimeout(() => {
@@ -132,11 +121,45 @@ export default function DopeTechEcommerce() {
       }, 1000)
       
       return () => {
-        window.removeEventListener("scroll", handleScroll)
+        window.removeEventListener("scroll", handleScroll as any)
         clearTimeout(timer)
       }
     }
   }, [])
+
+  // Dynamically measure header height and apply as hero top padding to avoid clipping
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const header = document.querySelector('header.dopetech-nav') as HTMLElement | null
+
+    const updateOffset = () => {
+      const h = header ? header.getBoundingClientRect().height : 56
+      const extra = window.innerWidth >= 1024 ? 8 : 16
+      setHeaderOffset(Math.round(h + extra))
+    }
+
+    updateOffset()
+
+    const onResize = () => updateOffset()
+    window.addEventListener('resize', onResize)
+
+    let ro: ResizeObserver | null = null
+    if (typeof ResizeObserver !== 'undefined' && header) {
+      ro = new ResizeObserver(updateOffset)
+      ro.observe(header)
+    }
+
+    return () => {
+      window.removeEventListener('resize', onResize)
+      if (ro) ro.disconnect()
+    }
+  }, [isMobileMenuOpen, isSearchOpen])
+
+  // Defer applying search text (debounced) to reduce re-renders while typing
+  useEffect(() => {
+    const t = setTimeout(() => setSearchQuery(searchDraft), 200)
+    return () => clearTimeout(t)
+  }, [searchDraft])
 
   // Update products when localStorage changes
   useEffect(() => {
@@ -283,6 +306,25 @@ export default function DopeTechEcommerce() {
     return () => clearInterval(interval)
   }, [])
 
+  // Track category section visibility and show the button only when it's out of view
+  useEffect(() => {
+    const el = categorySectionRef.current
+    if (!el || typeof window === 'undefined') return
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsCategoryInView(entry.isIntersecting),
+      { root: null, threshold: 0.2 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    setShowBackToCategories(!isCategoryInView)
+  }, [isCategoryInView])
+
+  // Cycle through category icons while the button is visible
+  // (moved below categories state declaration to avoid TS order error)
+
 
 
   const addToCart = useCallback((product: Product) => {
@@ -306,7 +348,6 @@ export default function DopeTechEcommerce() {
   }, [])
 
   const handleCategoryClick = (categoryId: string) => {
-    console.log("Category clicked:", categoryId) // Debug log
     setSelectedCategory(categoryId)
     // Clear search when switching categories
     setSearchQuery("")
@@ -315,8 +356,9 @@ export default function DopeTechEcommerce() {
     setTimeout(() => {
       const productsSection = document.querySelector('[data-products-section]')
       if (productsSection) {
-        // Calculate the target scroll position with offset
-        const headerHeight = 100 // Offset to keep category buttons visible
+        // Calculate the target scroll position with measured header height
+        const header = document.querySelector('header.dopetech-nav') as HTMLElement | null
+        const headerHeight = header ? header.offsetHeight + 12 : 72
         const rect = productsSection.getBoundingClientRect()
         const scrollTop = window.pageYOffset || document.documentElement.scrollTop
         const targetPosition = scrollTop + rect.top - headerHeight
@@ -327,7 +369,21 @@ export default function DopeTechEcommerce() {
           behavior: 'smooth'
         })
       }
-    }, 100)
+    }, 60)
+  }
+
+  const scrollToCategoryFilters = () => {
+    setTimeout(() => {
+      const header = document.querySelector('header.dopetech-nav') as HTMLElement | null
+      const headerHeight = header ? header.offsetHeight + 12 : 72
+      const elem = categorySectionRef.current
+      if (elem) {
+        const rect = elem.getBoundingClientRect()
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+        const targetPosition = scrollTop + rect.top - headerHeight
+        window.scrollTo({ top: targetPosition, behavior: 'smooth' })
+      }
+    }, 0)
   }
 
   const removeFromCart = (productId: number) => {
@@ -369,6 +425,8 @@ export default function DopeTechEcommerce() {
 
   const filteredProducts = useMemo(() => {
     return currentProducts.filter(product => {
+      // Hide products explicitly flagged to be hidden on home
+      if ((product as any).hiddenOnHome) return false
       const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                            product.description.toLowerCase().includes(searchQuery.toLowerCase())
       
@@ -383,10 +441,7 @@ export default function DopeTechEcommerce() {
     })
   }, [currentProducts, searchQuery, selectedCategory])
 
-  // Debug logging
-  console.log("Search query:", searchQuery)
-  console.log("Selected category:", selectedCategory)
-  console.log("Filtered products count:", filteredProducts.length)
+  // Debug logging removed for performance
 
   // Get categories from localStorage or use defaults
   // SVG Icon Component
@@ -407,37 +462,32 @@ export default function DopeTechEcommerce() {
   type CategoryIcon = React.ComponentType<{ className?: string }> | { type: 'svg', content: string }
 
   // Helper function to render category icons
-  const renderCategoryIcon = (icon: any, className: string) => {
+  const renderCategoryIcon = (icon: CategoryIcon, className: string) => {
     if (typeof icon === 'object' && 'type' in icon && icon.type === 'svg') {
       return <SvgIcon svgContent={icon.content} className={className} />
     }
-    return <icon className={className} />
+    const IconComp = icon as React.ComponentType<{ className?: string }>
+    return <IconComp className={className} />
   }
 
   const getCategories = () => {
     if (typeof window !== 'undefined') {
       try {
         const adminCategories = localStorage.getItem('adminCategories')
-        console.log('Raw admin categories from localStorage:', adminCategories)
         if (adminCategories) {
           try {
             const parsed = JSON.parse(adminCategories)
-            console.log('Parsed admin categories:', parsed)
             // Add icons to categories
             const result = parsed.map((cat: any) => {
-              console.log('Processing category:', cat)
               // If category has a custom icon, use it
               if (cat.icon && cat.icon !== "Grid") {
-                console.log('Category has custom icon:', cat.icon)
                 if (cat.icon.startsWith('<svg')) {
-                  console.log('Icon is SVG, creating SVG object')
                   // Return SVG content as a special object that will be handled by SvgIcon
                   return {
                     ...cat,
                     icon: { type: 'svg', content: cat.icon }
                   }
                 } else {
-                  console.log('Icon is Lucide name, mapping to component')
                   // Map common Lucide icon names to components
                   const iconComponent = 
                     cat.icon === "Gamepad2" ? Gamepad2 :
@@ -454,25 +504,23 @@ export default function DopeTechEcommerce() {
                   
                   return {
                     ...cat,
-                    icon: iconComponent
+                    icon: iconComponent as React.ComponentType<{ className?: string }>
                   }
                 }
               }
               
-              console.log('Using default icon mapping for category:', cat.id)
               // Use default icon mapping for existing categories
               return {
                 ...cat,
-                icon: cat.id === "all" ? Grid :
+                icon: (cat.id === "all" ? Grid :
                       cat.id === "keyboard" ? Keyboard :
                       cat.id === "mouse" ? Mouse :
                       cat.id === "audio" ? Headphones :
                       cat.id === "speaker" ? Speaker :
                       cat.id === "monitor" ? Camera :
-                      cat.id === "accessory" ? Cable : Grid
+                      cat.id === "accessory" ? Cable : Grid) as React.ComponentType<{ className?: string }>
               }
             })
-            console.log('Final processed categories:', result)
             return result
           } catch (e) {
             console.error('Error parsing admin categories:', e)
@@ -482,7 +530,6 @@ export default function DopeTechEcommerce() {
         console.error('Error accessing localStorage:', error)
       }
     }
-    console.log('Using default categories')
     return [
       { id: "all", name: "All Products", icon: Grid },
       { id: "keyboard", name: "Keyboards", icon: Keyboard },
@@ -494,7 +541,7 @@ export default function DopeTechEcommerce() {
     ]
   }
 
-  const [categories, setCategories] = useState([
+  const [categories, setCategories] = useState<{ id: string; name: string; icon: CategoryIcon }[]>([
     { id: "all", name: "All Products", icon: Grid },
     { id: "keyboard", name: "Keyboards", icon: Keyboard },
     { id: "mouse", name: "Mouse", icon: Mouse },
@@ -503,6 +550,15 @@ export default function DopeTechEcommerce() {
     { id: "monitor", name: "Monitors", icon: Camera },
     { id: "accessory", name: "Accessories", icon: Cable },
   ])
+
+  // Cycle through category icons while the button is visible
+  useEffect(() => {
+    if (!showBackToCategories || categories.length === 0) return
+    const id = setInterval(() => {
+      setCategoryIconIndex((prev) => (prev + 1) % categories.length)
+    }, 900)
+    return () => clearInterval(id)
+  }, [showBackToCategories, categories])
 
 
 
@@ -524,37 +580,35 @@ export default function DopeTechEcommerce() {
 
       {/* Enhanced Mobile Navigation */}
       <header className="fixed top-0 left-0 right-0 z-50 dopetech-nav animate-fade-in-down">
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-2 sm:py-3 md:py-4">
-          <nav className="flex items-center justify-between h-10 sm:h-12 md:h-14 lg:h-16">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-1">
+          <nav className="flex items-center justify-between h-auto min-h-10">
             {/* Left Side - Logo */}
-            <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-3 min-w-0 flex-1">
-              <img src="/images/dtechnepal.svg" alt="DopeTech" className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 logo-adaptive flex-shrink-0" />
+            <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-3 min-w-0 flex-1 pt-1">
+              <img src="/images/dtechnepal.svg" alt="DopeTech" className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 logo-adaptive flex-shrink-0" />
 
 
             </div>
 
             {/* Right Side - Controls */}
-            <div className="flex items-center justify-end space-x-1 sm:space-x-2 md:space-x-3 lg:space-x-4 flex-shrink-0">
+            <div className="flex items-center justify-end space-x-1.5 sm:space-x-2 md:space-x-2 lg:space-x-3 flex-shrink-0 pt-1">
               {/* Search Toggle */}
               <button
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
-                className="nav-icon-button p-1.5 sm:p-2 md:p-3 touch-target flex items-center justify-center hover-scale"
+                className="nav-icon-button nav-icon-elevated p-2 sm:p-2 md:p-2 touch-target flex items-center justify-center hover-scale mobile-nav-button"
                 aria-label="Search"
-                style={{ minHeight: '36px', minWidth: '36px' }}
               >
-                <Search className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 hover:text-[#F7DD0F] transition-colors" />
+                <Search className="w-5 h-5 sm:w-5 sm:h-5 md:w-5 md:h-5 hover:text-[#F7DD0F] transition-colors" />
               </button>
 
               {/* Shopping Cart with Badge */}
               <button 
                 onClick={() => setCartOpen(true)}
-                className="nav-icon-button relative p-1.5 sm:p-2 md:p-3 touch-target flex items-center justify-center hover-scale" 
+                className="nav-icon-button nav-icon-elevated relative p-2 sm:p-2 md:p-2 touch-target flex items-center justify-center hover-scale mobile-nav-button" 
                 aria-label="Shopping Cart"
-                style={{ minHeight: '36px', minWidth: '36px' }}
               >
-                <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 hover:text-[#F7DD0F] transition-colors" />
+                <ShoppingBag className="w-5 h-5 sm:w-5 sm:h-5 md:w-5 md:h-5 hover:text-[#F7DD0F] transition-colors" />
                 {getCartCount() > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 md:-top-2 md:-right-2 bg-[#F7DD0F] text-black text-xs rounded-full w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 flex items-center justify-center font-bold animate-bounce">
+                  <span className="absolute -top-1 -right-1 sm:-top-1 sm:-right-1 md:-top-2 md:-right-2 bg-[#F7DD0F] text-black text-xs rounded-full w-5 h-5 sm:w-5 sm:h-5 md:w-6 md:h-6 flex items-center justify-center font-bold animate-bounce">
                     {getCartCount()}
                   </span>
                 )}
@@ -565,11 +619,10 @@ export default function DopeTechEcommerce() {
                 href="https://www.instagram.com/dopetech_np/?hl=ne"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="nav-icon-button p-1.5 sm:p-2 md:p-3 touch-target flex items-center justify-center hover-scale"
+                className="nav-icon-button nav-icon-elevated p-2 sm:p-2 md:p-2 touch-target flex items-center justify-center hover-scale mobile-nav-button"
                 aria-label="Instagram"
-                style={{ minHeight: '36px', minWidth: '36px' }}
               >
-                <Instagram className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 hover:text-[#F7DD0F] transition-colors" />
+                <Instagram className="w-5 h-5 sm:w-5 sm:h-5 md:w-5 md:h-5 hover:text-[#F7DD0F] transition-colors" />
               </a>
 
 
@@ -577,15 +630,14 @@ export default function DopeTechEcommerce() {
               {/* Mobile Menu Toggle */}
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden nav-icon-button p-1.5 sm:p-2 touch-target flex items-center justify-center hover-scale"
+                className="md:hidden nav-icon-button nav-icon-elevated p-2 touch-target flex items-center justify-center hover-scale mobile-nav-button"
                 aria-label="Menu"
                 data-mobile-menu
-                style={{ minHeight: '36px', minWidth: '36px' }}
               >
                 {isMobileMenuOpen ? (
-                  <X className="w-4 h-4 sm:w-5 sm:h-5 hover:text-[#F7DD0F] transition-colors animate-scale-in" />
+                  <X className="w-5 h-5 hover:text-[#F7DD0F] transition-colors animate-scale-in" />
                 ) : (
-                  <Menu className="w-4 h-4 sm:w-5 sm:h-5 hover:text-[#F7DD0F] transition-colors" />
+                  <Menu className="w-5 h-5 hover:text-[#F7DD0F] transition-colors" />
                 )}
               </button>
             </div>
@@ -620,8 +672,8 @@ export default function DopeTechEcommerce() {
                   <input
                     type="text"
                     placeholder="Search for keyboards, mice, headphones, speakers..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    value={searchDraft}
+                    onChange={(e) => setSearchDraft(e.target.value)}
                     className="w-full pl-12 pr-4 py-4 text-lg bg-white/10 backdrop-blur-sm border border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#F7DD0F] focus:border-transparent text-white placeholder-gray-400"
                     autoFocus
                   />
@@ -632,8 +684,8 @@ export default function DopeTechEcommerce() {
 
           {/* Mobile Menu */}
           {isMobileMenuOpen && (
-            <div className="mt-2 sm:mt-4 animate-slide-in-down bg-black/90 backdrop-blur-md rounded-xl p-3 sm:p-4 border border-gray-700 md:hidden" data-mobile-menu>
-              <div className="space-y-2 sm:space-y-3">
+            <div className="absolute top-full left-0 right-0 mt-2 animate-slide-in-down bg-black/95 backdrop-blur-xl rounded-2xl p-4 sm:p-5 border border-gray-700 shadow-2xl md:hidden mobile-menu-enhanced z-50" data-mobile-menu>
+              <div className="space-y-3 sm:space-y-4">
                 {categories.map((category) => (
                   <button
                     key={category.id}
@@ -641,22 +693,22 @@ export default function DopeTechEcommerce() {
                       handleCategoryClick(category.id)
                       setIsMobileMenuOpen(false)
                     }}
-                    className={`w-full flex items-center space-x-2 sm:space-x-3 px-3 sm:px-4 py-2.5 sm:py-3 rounded-lg transition-all duration-200 touch-target ${
+                    className={`w-full flex items-center space-x-3 sm:space-x-4 px-4 sm:px-5 py-3 sm:py-4 rounded-xl transition-all duration-200 touch-target mobile-menu-item ${
                       selectedCategory === category.id
-                        ? "bg-[#F7DD0F] text-black"
-                        : "text-white hover:bg-white/10"
+                        ? "bg-[#F7DD0F] text-black shadow-lg"
+                        : "text-white hover:bg-white/10 active:bg-white/20"
                     }`}
-                    style={{ minHeight: '44px' }}
+                    style={{ minHeight: '56px' }}
                   >
-                    {typeof category.icon === 'object' && 'type' in category.icon && category.icon.type === 'svg' ? (
+                    {typeof category.icon === 'object' && 'type' in category.icon && (category.icon as any).type === 'svg' ? (
                       <SvgIcon 
                         svgContent={(category.icon as { type: 'svg', content: string }).content} 
-                        className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" 
+                        className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 mobile-icon" 
                       />
                     ) : (
-                      <category.icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
+                      renderCategoryIcon(category.icon, "w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 mobile-icon")
                     )}
-                    <span className="font-medium text-sm sm:text-base">{category.name}</span>
+                    <span className="font-medium text-base sm:text-lg">{category.name}</span>
                   </button>
                 ))}
               </div>
@@ -666,19 +718,19 @@ export default function DopeTechEcommerce() {
       </header>
 
       {/* Welcome Section - Mobile Optimized */}
-      <section className="pt-20 sm:pt-24 md:pt-28 pb-4 sm:pb-8 md:pb-12 relative mobile-hero" style={{ background: 'linear-gradient(135deg, #000000 0%, #1a1a0a 50%, #000000 100%)' }}>
+      <section className="safe-top pb-4 sm:pb-8 md:pb-12 relative mobile-hero" style={{ background: 'linear-gradient(135deg, #000000 0%, #1a1a0a 50%, #000000 100%)', paddingTop: headerOffset }}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Page Header */}
-          <div className="text-center mb-6 sm:mb-8 md:mb-10">
-            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold mb-2 sm:mb-3 md:mb-4 animate-fade-in-up stagger-1 leading-tight">
+          <div className="text-center mb-4 sm:mb-6 md:mb-8">
+            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold mb-2 sm:mb-3 md:mb-4 animate-fade-in-up stagger-1 leading-tight mt-3 sm:mt-4 md:mt-6">
               Your Setup, <span className="text-[#F7DD0F] animate-pulse">Perfected</span>
             </h1>
             <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-300 mb-4 sm:mb-6 md:mb-8 animate-fade-in-up stagger-2 leading-relaxed">
               Premium Tech Gear from <span className="text-[#F7DD0F] animate-float">DopeTech</span> Nepal
             </p>
             
-            {/* Autoplay GIF with Borderless Glow - Larger on Mobile */}
-            <div className="w-full max-w-5xl mx-auto mb-6 sm:mb-8 md:mb-10 animate-fade-in-up stagger-3 borderless-glow">
+            {/* Autoplay GIF with Borderless Glow - Rounded pill container */}
+            <div className="w-full max-w-5xl mx-auto mt-4 sm:mt-6 md:mt-8 mb-4 sm:mb-6 md:mb-6 animate-fade-in-up stagger-3 borderless-glow cv-auto rounded-full overflow-hidden ring-1 ring-white/10">
               <img
                 src={(() => {
                   if (typeof window !== 'undefined') {
@@ -697,14 +749,15 @@ export default function DopeTechEcommerce() {
                   return "/gif/doptechgif.gif"
                 })()}
                 alt="DopeTech Introduction"
-                className="w-full h-48 sm:h-40 md:h-48 lg:h-56 xl:h-64 rounded-xl shadow-xl object-cover object-center"
+                className="w-full h-44 sm:h-40 md:h-44 lg:h-48 xl:h-56 shadow-xl object-cover object-center"
                 loading="lazy"
+                decoding="async"
                 key={animationKey}
               />
             </div>
 
             {/* Category Filter - Mobile Optimized with Smaller Touch Targets */}
-            <div className="flex flex-wrap justify-center gap-2 sm:gap-3 md:gap-4 mb-6 sm:mb-8 md:mb-10 px-2 animate-fade-in-up stagger-4">
+            <div ref={categorySectionRef} className="flex flex-wrap justify-center gap-2 sm:gap-3 md:gap-4 mb-6 sm:mb-8 md:mb-10 px-2 animate-fade-in-up stagger-4 hero-spacing">
               {/* First row */}
               <div className="flex flex-wrap justify-center gap-2 sm:gap-3 md:gap-4 w-full">
                 {categories.slice(0, 3).map((category, index) => (
@@ -718,13 +771,13 @@ export default function DopeTechEcommerce() {
                       }`}
                       aria-label={`Filter by ${category.name}`}
                     >
-                      {typeof category.icon === 'object' && 'type' in category.icon && category.icon.type === 'svg' ? (
+                      {typeof category.icon === 'object' && 'type' in category.icon && (category.icon as any).type === 'svg' ? (
                         <SvgIcon 
                           svgContent={(category.icon as { type: 'svg', content: string }).content} 
                           className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" 
                         />
                       ) : (
-                        <category.icon className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" />
+                        renderCategoryIcon(category.icon, "w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5")
                       )}
                       <span>{category.name}</span>
                     </button>
@@ -748,13 +801,13 @@ export default function DopeTechEcommerce() {
                       }`}
                       aria-label={`Filter by ${category.name}`}
                     >
-                      {typeof category.icon === 'object' && 'type' in category.icon && category.icon.type === 'svg' ? (
+                      {typeof category.icon === 'object' && 'type' in category.icon && (category.icon as any).type === 'svg' ? (
                         <SvgIcon 
                           svgContent={(category.icon as { type: 'svg', content: string }).content} 
                           className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" 
                         />
                       ) : (
-                        <category.icon className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" />
+                        renderCategoryIcon(category.icon, "w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5")
                       )}
                       <span>{category.name}</span>
                     </button>
@@ -764,40 +817,50 @@ export default function DopeTechEcommerce() {
             </div>
           </div>
 
-          {/* Products Grid - Mobile Optimized with Single Column */}
+          {/* Products Grid - Enhanced Mobile & Desktop UX */}
           <div 
             data-products-section
-            className={`grid gap-4 sm:gap-6 md:gap-8 ${
+            className={`grid gap-4 sm:gap-6 md:gap-8 mt-6 sm:mt-8 md:mt-10 cv-auto ${
               viewMode === "grid" 
                 ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" 
                 : "grid-cols-1"
             }`}>
             {filteredProducts.map((product, index) => (
               <div key={product.id} className="group animate-fade-in-up mobile-product-card hover-lift" style={{ animationDelay: `${index * 0.1}s` }}>
-                <div className="dopetech-card p-4 sm:p-6 h-full flex flex-col premium-card hover-scale rounded-2xl shadow-lg">
-                  {/* Product Image */}
-                  <div className="relative mb-4 sm:mb-5 image-container">
-                    <img
+                <div className="dopetech-card p-4 sm:p-6 h-full flex flex-col premium-card hover-scale rounded-2xl shadow-lg border border-gray-200/10 backdrop-blur-sm">
+                  {/* Product Image with Enhanced Hover Effects */}
+                  <div className="relative mb-4 sm:mb-5 image-container overflow-hidden rounded-xl">
+                      <img
                       src={product.image}
                       alt={product.name}
-                      className="w-full h-48 sm:h-56 md:h-64 object-cover rounded-xl transition-transform duration-200 group-hover:scale-105"
-                      loading="lazy"
+                        className="w-full h-48 sm:h-56 md:h-64 object-cover transition-all duration-300 group-hover:scale-110 group-hover:rotate-1"
+                        loading="lazy"
+                        decoding="async"
                     />
+                    
+                    {/* Gradient Overlay on Hover */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
+                    {/* Stock Status Badge */}
                     {!product.inStock && (
-                      <div className="absolute top-3 right-3 bg-gray-500 text-white px-3 py-1.5 rounded-full text-sm font-medium">
+                      <div className="absolute top-3 right-3 bg-red-500 text-white px-3 py-1.5 rounded-full text-sm font-medium shadow-lg">
                         Out of Stock
                       </div>
                     )}
-                    <button className="absolute top-3 right-3 bg-white/80 backdrop-blur-sm p-2.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity touch-target">
-                      <Heart className="w-4 h-4 text-gray-600" />
-                    </button>
+                    
+                    {/* Quick View Overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="bg-black/80 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-medium">
+                        Quick View
+                      </div>
+                    </div>
                   </div>
 
-                  {/* Product Info */}
+                  {/* Product Info with Enhanced Typography */}
                   <div className="flex-1 flex flex-col content">
-                    <div className="flex items-center space-x-2 mb-2">
-                      <div className="flex items-center">
+                    {/* Rating and Reviews */}
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center space-x-1">
                         {[...Array(5)].map((_, i) => (
                           <Star
                             key={i}
@@ -807,49 +870,79 @@ export default function DopeTechEcommerce() {
                           />
                         ))}
                       </div>
-                      <span className="text-sm text-gray-400">
-                        ({product.reviews})
+                      <span className="text-xs sm:text-sm text-gray-400">
+                        ({product.reviews} reviews)
                       </span>
                     </div>
 
-                    <h3 className="font-bold text-base sm:text-lg mb-2 line-clamp-2 title leading-tight">{product.name}</h3>
+                    {/* Product Title */}
+                    <h3 className="font-bold text-base sm:text-lg mb-2 line-clamp-2 title leading-tight group-hover:text-[#F7DD0F] transition-colors duration-200">
+                      {product.name}
+                    </h3>
+                    
+                    {/* Product Description */}
                     <p className="text-sm text-gray-400 mb-3 line-clamp-2 leading-relaxed">
                       {product.description}
                     </p>
 
-                    {/* Features */}
-                    <div className="flex flex-wrap gap-2 mb-3">
+                    {/* Enhanced Features Display */}
+                    <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4">
                       {product.features.slice(0, 2).map((feature, index) => (
                         <span
                           key={index}
-                          className="text-sm bg-[#F7DD0F]/20 text-[#F7DD0F] px-3 py-1.5 rounded-full font-medium"
+                          className="text-xs sm:text-sm bg-[#F7DD0F]/20 text-[#F7DD0F] px-2.5 py-1 rounded-full font-medium border border-[#F7DD0F]/30"
                         >
                           {feature}
                         </span>
                       ))}
                     </div>
 
-                    {/* Price */}
+                    {/* Enhanced Price and Action Section */}
                     <div className="mt-auto">
-                      <div className="flex items-center space-x-2 mb-3">
-                        <span className="text-lg sm:text-xl font-bold price">Rs {product.price}</span>
-                        {product.originalPrice > product.price && (
-                          <span className="text-sm text-gray-500 line-through">
-                            Rs {product.originalPrice}
-                          </span>
-                        )}
+                      <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-lg sm:text-xl font-bold price text-[#F7DD0F]">Rs {product.price}</span>
+                          {product.originalPrice > product.price && (
+                            <span className="text-sm text-gray-500 line-through">
+                              Rs {product.originalPrice}
+                            </span>
+                          )}
+                        </div>
+                        
+                        {/* Stock Indicator */}
+                        <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+                          product.inStock 
+                            ? "bg-green-500/20 text-green-400 border border-green-500/30" 
+                            : "bg-red-500/20 text-red-400 border border-red-500/30"
+                        }`}>
+                          {product.inStock ? "In Stock" : "Out of Stock"}
+                        </div>
                       </div>
 
                       <button
                         onClick={() => addToCart(product)}
                         disabled={!product.inStock}
-                        className={`w-full py-4 sm:py-5 px-4 rounded-xl font-semibold text-base sm:text-lg transition-all duration-200 touch-target button min-h-[48px] ${
+                        className={`w-full py-3 sm:py-4 px-4 rounded-xl font-semibold text-base sm:text-lg transition-all duration-300 touch-target button min-h-[48px] relative overflow-hidden group ${
                           product.inStock
-                            ? "bg-[#F7DD0F] text-black hover:bg-[#F7DD0F]/90 hover:scale-105 shadow-lg active:scale-95 active:shadow-xl"
+                            ? "bg-[#F7DD0F] text-black hover:bg-[#F7DD0F]/90 hover:scale-105 shadow-lg active:scale-95 active:shadow-xl hover:shadow-[#F7DD0F]/25"
                             : "bg-gray-300 text-gray-500 cursor-not-allowed"
                         }`}
                       >
-                        {product.inStock ? "Add to Cart" : "Out of Stock"}
+                        <span className="relative z-10 flex items-center justify-center">
+                          {product.inStock ? (
+                            <>
+                              <Plus className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+                              Add to Cart
+                            </>
+                          ) : (
+                            "Out of Stock"
+                          )}
+                        </span>
+                        
+                        {/* Button Hover Effect */}
+                        {product.inStock && (
+                          <div className="absolute inset-0 bg-gradient-to-r from-[#F7DD0F] to-yellow-400 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        )}
                       </button>
                     </div>
                   </div>
@@ -874,13 +967,13 @@ export default function DopeTechEcommerce() {
           </div>
 
           {/* Marquee Container - Mobile Optimized */}
-          <div className="relative overflow-hidden">
+              <div className="relative overflow-hidden cv-auto">
             {/* Horizontal Scroll Container */}
             <div className="flex space-x-4 sm:space-x-6 md:space-x-8 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4">
               {/* Continuous Marquee Row */}
               <div className="flex animate-marquee space-x-4 sm:space-x-6 md:space-x-8">
                 {/* First set of products */}
-                {products.map((product, index) => (
+                {products.filter((p: any) => !p.hiddenOnHome).map((product, index) => (
                   <div key={`first-${product.id}`} className="group relative flex-shrink-0">
                     <div className="relative overflow-hidden rounded-2xl w-56 h-48 sm:w-64 sm:h-56 md:w-72 md:h-64 lg:w-80 lg:h-72">
                       <img
@@ -915,7 +1008,7 @@ export default function DopeTechEcommerce() {
                 ))}
                 
                 {/* Duplicate set for seamless loop */}
-                {products.map((product, index) => (
+                {products.filter((p: any) => !p.hiddenOnHome).map((product, index) => (
                   <div key={`second-${product.id}`} className="group relative flex-shrink-0">
                     <div className="relative overflow-hidden rounded-2xl w-56 h-48 sm:w-64 sm:h-56 md:w-72 md:h-64 lg:w-80 lg:h-72">
                       <img
@@ -1075,11 +1168,31 @@ export default function DopeTechEcommerce() {
 
 
 
-      {/* AI Chat Assistant */}
-      <AIChatAssistant
-        products={products}
-        onAddToCart={addToCart}
-      />
+      {/* Back to Category Filters floating button */}
+      {showBackToCategories && (
+        <button
+          onClick={scrollToCategoryFilters}
+          className="fixed right-4 md:right-6 bottom-24 md:bottom-28 z-50 flex items-center gap-2 px-4 py-3 rounded-full glass-dark border border-white/10 shadow-2xl hover:shadow-[0_12px_30px_rgba(247,221,15,0.25)] transition-all duration-200 hover:scale-105"
+          aria-label="Back to category filters"
+        >
+          {/* Circle icon wrapper styled like the chat icon */}
+          <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#F7DD0F] text-black shadow-lg">
+            {(() => {
+              const item = categories[categoryIconIndex]
+              if (!item) return null
+              if (typeof item.icon === 'object' && 'type' in item.icon && (item.icon as any).type === 'svg') {
+                return <SvgIcon svgContent={(item.icon as { type: 'svg', content: string }).content} className="w-5 h-5" />
+              }
+              const IconComp = item.icon as React.ComponentType<{ className?: string }>
+              return <IconComp className="w-5 h-5" />
+            })()}
+          </span>
+          <span className="text-sm font-bold">Back to Filters</span>
+        </button>
+      )}
+
+      {/* AI Chat Assistant (lazy) */}
+      <LazyAIChat products={products} onAddToCart={addToCart} />
     </div>
     </>
   )
