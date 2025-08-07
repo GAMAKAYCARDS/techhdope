@@ -235,16 +235,19 @@ export default function DopeTechEcommerce() {
     // Clear search when switching categories
     setSearchQuery("")
     
-    // Auto scroll to products section
+    // Smooth scroll to products section with offset
     setTimeout(() => {
       const productsSection = document.querySelector('[data-products-section]')
       if (productsSection) {
-        const headerHeight = 100 // Approximate header height
-        const elementTop = productsSection.getBoundingClientRect().top + window.pageYOffset
-        const offsetPosition = elementTop - headerHeight - 80 // Adjusted for new category position
+        // Calculate the target scroll position with offset
+        const headerHeight = 100 // Offset to keep category buttons visible
+        const rect = productsSection.getBoundingClientRect()
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+        const targetPosition = scrollTop + rect.top - headerHeight
         
+        // Smooth scroll to the calculated position
         window.scrollTo({
-          top: offsetPosition,
+          top: targetPosition,
           behavior: 'smooth'
         })
       }
@@ -474,107 +477,132 @@ export default function DopeTechEcommerce() {
 
       {/* Welcome Section - Mobile Optimized */}
       <section className="pt-20 sm:pt-24 md:pt-28 pb-4 sm:pb-8 md:pb-12 relative mobile-hero" style={{ background: 'linear-gradient(135deg, #000000 0%, #1a1a0a 50%, #000000 100%)' }}>
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Page Header */}
-          <div className="text-center mb-4 sm:mb-6 md:mb-8">
-            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold mb-1 sm:mb-2 md:mb-3 animate-fade-in-up stagger-1 leading-tight">
+          <div className="text-center mb-6 sm:mb-8 md:mb-10">
+            <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold mb-2 sm:mb-3 md:mb-4 animate-fade-in-up stagger-1 leading-tight">
               Your Setup, <span className="text-[#F7DD0F] animate-pulse">Perfected</span>
             </h1>
-            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-300 mb-2 sm:mb-4 md:mb-6 animate-fade-in-up stagger-2 leading-relaxed">
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-300 mb-4 sm:mb-6 md:mb-8 animate-fade-in-up stagger-2 leading-relaxed">
               Premium Tech Gear from <span className="text-[#F7DD0F] animate-float">DopeTech</span> Nepal
             </p>
             
-            {/* Autoplay GIF with Borderless Glow */}
-            <div className="w-full max-w-4xl mx-auto mb-4 sm:mb-6 md:mb-8 animate-fade-in-up stagger-3 borderless-glow">
+            {/* Autoplay GIF with Borderless Glow - Shorter on Mobile */}
+            <div className="w-full max-w-4xl mx-auto mb-6 sm:mb-8 md:mb-10 animate-fade-in-up stagger-3 borderless-glow">
               <img
                 src="/gif/doptechgif.gif"
                 alt="DopeTech Introduction"
-                className="w-full h-32 sm:h-40 md:h-48 lg:h-56 rounded-lg shadow-xl object-cover object-center"
+                className="w-full h-24 sm:h-32 md:h-40 lg:h-48 rounded-xl shadow-xl object-cover object-center"
                 loading="lazy"
               />
             </div>
 
-            {/* Category Filter - Mobile Optimized */}
-            <div className="flex flex-wrap justify-center gap-1.5 sm:gap-2 md:gap-3 mb-4 sm:mb-6 md:mb-8 px-1 animate-fade-in-up stagger-4">
-              {categories.map((category, index) => (
-                <div key={category.id} className="relative animate-fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
-                  <button
-                    onClick={() => handleCategoryClick(category.id)}
-                    className={`flex items-center space-x-1 sm:space-x-1.5 px-2 sm:px-3 md:px-4 py-1.5 sm:py-2 md:py-3 rounded-full transition-all duration-200 cursor-pointer text-xs sm:text-sm md:text-base touch-target hover-scale hover-glow ${
-                      selectedCategory === category.id
-                        ? "bg-[#F7DD0F] text-black shadow-lg animate-pulse"
-                        : "bg-white/10 backdrop-blur-sm border border-gray-200 dark:border-gray-700 hover:bg-[#F7DD0F]/10"
-                    }`}
-                    aria-label={`Filter by ${category.name}`}
-                  >
-                    <category.icon className="w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4" />
-                    <span className="font-medium hidden xs:inline">{category.name}</span>
-                    <span className="font-medium xs:hidden">{category.name.split(' ')[0]}</span>
-                  </button>
-                </div>
-              ))}
+            {/* Category Filter - Mobile Optimized with Larger Touch Targets */}
+            <div className="flex flex-wrap justify-center gap-3 sm:gap-4 md:gap-5 mb-6 sm:mb-8 md:mb-10 px-2 animate-fade-in-up stagger-4">
+              {/* First row */}
+              <div className="flex flex-wrap justify-center gap-3 sm:gap-4 md:gap-5 w-full">
+                {categories.slice(0, 3).map((category, index) => (
+                  <div key={category.id} className="relative animate-fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
+                    <button
+                      onClick={() => handleCategoryClick(category.id)}
+                      className={`flex items-center space-x-2 px-4 sm:px-5 md:px-6 py-3 sm:py-4 md:py-5 rounded-full transition-all duration-200 cursor-pointer text-sm sm:text-base md:text-lg touch-target hover-scale hover-glow min-h-[44px] ${
+                        selectedCategory === category.id
+                          ? "bg-[#F7DD0F] text-black shadow-lg animate-pulse font-bold"
+                          : "bg-white/10 backdrop-blur-sm border border-gray-200 dark:border-gray-700 hover:bg-[#F7DD0F]/10 font-medium"
+                      }`}
+                      aria-label={`Filter by ${category.name}`}
+                    >
+                      <category.icon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+                      <span>{category.name}</span>
+                    </button>
+                  </div>
+                ))}
+              </div>
+              
+              {/* Divider */}
+              <div className="w-full h-px bg-gradient-to-r from-transparent via-gray-600 to-transparent my-2 sm:my-3 opacity-50"></div>
+              
+              {/* Second row */}
+              <div className="flex flex-wrap justify-center gap-3 sm:gap-4 md:gap-5 w-full">
+                {categories.slice(3).map((category, index) => (
+                  <div key={category.id} className="relative animate-fade-in-up" style={{ animationDelay: `${(index + 3) * 0.1}s` }}>
+                    <button
+                      onClick={() => handleCategoryClick(category.id)}
+                      className={`flex items-center space-x-2 px-4 sm:px-5 md:px-6 py-3 sm:py-4 md:py-5 rounded-full transition-all duration-200 cursor-pointer text-sm sm:text-base md:text-lg touch-target hover-scale hover-glow min-h-[44px] ${
+                        selectedCategory === category.id
+                          ? "bg-[#F7DD0F] text-black shadow-lg animate-pulse font-bold"
+                          : "bg-white/10 backdrop-blur-sm border border-gray-200 dark:border-gray-700 hover:bg-[#F7DD0F]/10 font-medium"
+                      }`}
+                      aria-label={`Filter by ${category.name}`}
+                    >
+                      <category.icon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" />
+                      <span>{category.name}</span>
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
-          {/* Products Grid - Mobile Optimized */}
+          {/* Products Grid - Mobile Optimized with Single Column */}
           <div 
             data-products-section
-            className={`grid gap-3 sm:gap-4 md:gap-6 ${
+            className={`grid gap-4 sm:gap-6 md:gap-8 ${
               viewMode === "grid" 
-                ? "grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" 
+                ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" 
                 : "grid-cols-1"
             }`}>
             {filteredProducts.map((product, index) => (
               <div key={product.id} className="group animate-fade-in-up mobile-product-card hover-lift" style={{ animationDelay: `${index * 0.1}s` }}>
-                <div className="dopetech-card p-2 sm:p-3 h-full flex flex-col premium-card hover-scale">
+                <div className="dopetech-card p-4 sm:p-6 h-full flex flex-col premium-card hover-scale rounded-2xl shadow-lg">
                   {/* Product Image */}
-                  <div className="relative mb-1.5 sm:mb-2 image-container">
+                  <div className="relative mb-4 sm:mb-5 image-container">
                     <img
                       src={product.image}
                       alt={product.name}
-                      className="w-full h-28 sm:h-36 md:h-44 object-cover rounded-lg transition-transform duration-200 group-hover:scale-105"
+                      className="w-full h-48 sm:h-56 md:h-64 object-cover rounded-xl transition-transform duration-200 group-hover:scale-105"
                       loading="lazy"
                     />
 
                     {!product.inStock && (
-                      <div className="absolute top-2 right-2 bg-gray-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                      <div className="absolute top-3 right-3 bg-gray-500 text-white px-3 py-1.5 rounded-full text-sm font-medium">
                         Out of Stock
                       </div>
                     )}
-                    <button className="absolute top-2 right-2 bg-white/80 backdrop-blur-sm p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity touch-target">
-                      <Heart className="w-3 h-3 text-gray-600" />
+                    <button className="absolute top-3 right-3 bg-white/80 backdrop-blur-sm p-2.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity touch-target">
+                      <Heart className="w-4 h-4 text-gray-600" />
                     </button>
                   </div>
 
                   {/* Product Info */}
                   <div className="flex-1 flex flex-col content">
-                    <div className="flex items-center space-x-1 mb-0.5">
+                    <div className="flex items-center space-x-2 mb-2">
                       <div className="flex items-center">
                         {[...Array(5)].map((_, i) => (
                           <Star
                             key={i}
-                            className={`w-2.5 h-2.5 ${
+                            className={`w-3 h-3 sm:w-4 sm:h-4 ${
                               i < Math.floor(product.rating) ? "text-yellow-400 fill-current" : "text-gray-300"
                             }`}
                           />
                         ))}
                       </div>
-                      <span className="text-xs text-gray-400">
+                      <span className="text-sm text-gray-400">
                         ({product.reviews})
                       </span>
                     </div>
 
-                    <h3 className="font-semibold text-xs sm:text-sm mb-0.5 line-clamp-1 title">{product.name}</h3>
-                    <p className="text-xs text-gray-400 mb-1 line-clamp-1">
+                    <h3 className="font-bold text-base sm:text-lg mb-2 line-clamp-2 title leading-tight">{product.name}</h3>
+                    <p className="text-sm text-gray-400 mb-3 line-clamp-2 leading-relaxed">
                       {product.description}
                     </p>
 
                     {/* Features */}
-                    <div className="flex flex-wrap gap-1 mb-1">
-                      {product.features.slice(0, 1).map((feature, index) => (
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {product.features.slice(0, 2).map((feature, index) => (
                         <span
                           key={index}
-                          className="text-xs bg-[#F7DD0F]/20 text-[#F7DD0F] px-1.5 py-0.5 rounded-full font-medium"
+                          className="text-sm bg-[#F7DD0F]/20 text-[#F7DD0F] px-3 py-1.5 rounded-full font-medium"
                         >
                           {feature}
                         </span>
@@ -583,10 +611,10 @@ export default function DopeTechEcommerce() {
 
                     {/* Price */}
                     <div className="mt-auto">
-                      <div className="flex items-center space-x-1 mb-1">
-                        <span className="text-sm sm:text-base font-bold price">Rs {product.price}</span>
+                      <div className="flex items-center space-x-2 mb-3">
+                        <span className="text-lg sm:text-xl font-bold price">Rs {product.price}</span>
                         {product.originalPrice > product.price && (
-                          <span className="text-xs text-gray-500 line-through">
+                          <span className="text-sm text-gray-500 line-through">
                             Rs {product.originalPrice}
                           </span>
                         )}
@@ -595,9 +623,9 @@ export default function DopeTechEcommerce() {
                       <button
                         onClick={() => addToCart(product)}
                         disabled={!product.inStock}
-                        className={`w-full py-1.5 sm:py-2 px-2 rounded-md font-medium transition-all duration-200 touch-target button ${
+                        className={`w-full py-4 sm:py-5 px-4 rounded-xl font-semibold text-base sm:text-lg transition-all duration-200 touch-target button min-h-[48px] ${
                           product.inStock
-                            ? "bg-[#F7DD0F] text-black hover:bg-[#F7DD0F]/90 hover:scale-105"
+                            ? "bg-[#F7DD0F] text-black hover:bg-[#F7DD0F]/90 hover:scale-105 shadow-lg active:scale-95 active:shadow-xl"
                             : "bg-gray-300 text-gray-500 cursor-not-allowed"
                         }`}
                       >
@@ -613,10 +641,10 @@ export default function DopeTechEcommerce() {
       </section>
 
       {/* Dope Picks Marquee Section - Mobile Optimized */}
-      <section className="pt-8 sm:pt-12 pb-8 sm:pb-12 overflow-hidden relative" style={{ background: 'linear-gradient(135deg, #000000 0%, #1a1a0a 50%, #000000 100%)' }}>
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+      <section className="pt-8 sm:pt-12 pb-20 sm:pb-24 overflow-hidden relative" style={{ background: 'linear-gradient(135deg, #000000 0%, #1a1a0a 50%, #000000 100%)' }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Section Header */}
-          <div className="text-center mb-6 sm:mb-8 md:mb-12 animate-fade-in-up">
+          <div className="text-center mb-6 sm:mb-8 md:mb-10 animate-fade-in-up">
             <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-2 sm:mb-3">
               Dope <span className="text-[#F7DD0F]">Picks</span>
             </h2>
@@ -626,78 +654,81 @@ export default function DopeTechEcommerce() {
           </div>
 
           {/* Marquee Container - Mobile Optimized */}
-          <div className="relative">
-            {/* Continuous Marquee Row */}
-            <div className="flex animate-marquee space-x-6 sm:space-x-8">
-              {/* First set of products */}
-              {products.map((product, index) => (
-                <div key={`first-${product.id}`} className="group relative flex-shrink-0">
-                  <div className="relative overflow-hidden rounded-2xl w-64 h-64 sm:w-72 sm:h-72 md:w-80 md:h-80">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-full object-cover transition-all duration-200 group-hover:scale-110 group-hover:rotate-1"
-                    />
-                    
-                    {/* Gradient Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                    
-                    {/* Product Name Overlay */}
-                    <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 transform translate-y-full group-hover:translate-y-0 transition-transform duration-200">
-                      <h3 className="text-white font-semibold text-base sm:text-lg mb-2">{product.name}</h3>
-                      <p className="text-[#F7DD0F] font-bold text-lg sm:text-xl">Rs {product.price}</p>
+          <div className="relative overflow-hidden">
+            {/* Horizontal Scroll Container */}
+            <div className="flex space-x-4 sm:space-x-6 md:space-x-8 overflow-x-auto scrollbar-hide pb-4 -mx-4 px-4">
+              {/* Continuous Marquee Row */}
+              <div className="flex animate-marquee space-x-4 sm:space-x-6 md:space-x-8">
+                {/* First set of products */}
+                {products.map((product, index) => (
+                  <div key={`first-${product.id}`} className="group relative flex-shrink-0">
+                    <div className="relative overflow-hidden rounded-2xl w-56 h-48 sm:w-64 sm:h-56 md:w-72 md:h-64 lg:w-80 lg:h-72">
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-full h-full object-cover transition-all duration-200 group-hover:scale-110 group-hover:rotate-1"
+                      />
+                      
+                      {/* Gradient Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                      
+                      {/* Product Name Overlay */}
+                      <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 md:p-6 transform translate-y-full group-hover:translate-y-0 transition-transform duration-200">
+                        <h3 className="text-white font-semibold text-sm sm:text-base md:text-lg mb-1 sm:mb-2">{product.name}</h3>
+                        <p className="text-[#F7DD0F] font-bold text-base sm:text-lg md:text-xl">Rs {product.price}</p>
+                      </div>
+                      
+                      {/* NEW Badge */}
+                      <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 sm:px-2.5 sm:py-1 rounded-full text-xs font-bold shadow-lg">
+                        NEW
+                      </div>
                     </div>
                     
-                    {/* NEW Badge */}
-                    <div className="absolute top-3 right-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2.5 py-1 rounded-full text-xs font-bold shadow-lg">
-                      NEW
-                    </div>
+                    {/* Floating Action Button */}
+                    <button
+                      onClick={() => addToCart(product)}
+                      className="absolute -bottom-2 -right-2 bg-[#F7DD0F] text-black p-2.5 sm:p-3 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-200 hover:scale-110 hover:shadow-xl touch-target"
+                    >
+                      <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+                    </button>
                   </div>
-                  
-                  {/* Floating Action Button */}
-                  <button
-                    onClick={() => addToCart(product)}
-                    className="absolute -bottom-2 -right-2 bg-[#F7DD0F] text-black p-3 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-200 hover:scale-110 hover:shadow-xl touch-target"
-                  >
-                    <Plus className="w-5 h-5" />
-                  </button>
-                </div>
-              ))}
-              
-              {/* Duplicate set for seamless loop */}
-              {products.map((product, index) => (
-                <div key={`second-${product.id}`} className="group relative flex-shrink-0">
-                  <div className="relative overflow-hidden rounded-2xl w-64 h-64 sm:w-72 sm:h-72 md:w-80 md:h-80">
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-full h-full object-cover transition-all duration-200 group-hover:scale-110 group-hover:rotate-1"
-                    />
-                    
-                    {/* Gradient Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
-                    
-                    {/* Product Name Overlay */}
-                    <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 transform translate-y-full group-hover:translate-y-0 transition-transform duration-200">
-                      <h3 className="text-white font-semibold text-base sm:text-lg mb-2">{product.name}</h3>
-                      <p className="text-[#F7DD0F] font-bold text-lg sm:text-xl">Rs {product.price}</p>
+                ))}
+                
+                {/* Duplicate set for seamless loop */}
+                {products.map((product, index) => (
+                  <div key={`second-${product.id}`} className="group relative flex-shrink-0">
+                    <div className="relative overflow-hidden rounded-2xl w-56 h-48 sm:w-64 sm:h-56 md:w-72 md:h-64 lg:w-80 lg:h-72">
+                      <img
+                        src={product.image}
+                        alt={product.name}
+                        className="w-full h-full object-cover transition-all duration-200 group-hover:scale-110 group-hover:rotate-1"
+                      />
+                      
+                      {/* Gradient Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                      
+                      {/* Product Name Overlay */}
+                      <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 md:p-6 transform translate-y-full group-hover:translate-y-0 transition-transform duration-200">
+                        <h3 className="text-white font-semibold text-sm sm:text-base md:text-lg mb-1 sm:mb-2">{product.name}</h3>
+                        <p className="text-[#F7DD0F] font-bold text-base sm:text-lg md:text-xl">Rs {product.price}</p>
+                      </div>
+                      
+                      {/* NEW Badge */}
+                      <div className="absolute top-2 right-2 sm:top-3 sm:right-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2 py-1 sm:px-2.5 sm:py-1 rounded-full text-xs font-bold shadow-lg">
+                        NEW
+                      </div>
                     </div>
                     
-                    {/* NEW Badge */}
-                    <div className="absolute top-3 right-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-2.5 py-1 rounded-full text-xs font-bold shadow-lg">
-                      NEW
-                    </div>
+                    {/* Floating Action Button */}
+                    <button
+                      onClick={() => addToCart(product)}
+                      className="absolute -bottom-2 -right-2 bg-[#F7DD0F] text-black p-2.5 sm:p-3 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-200 hover:scale-110 hover:shadow-xl touch-target"
+                    >
+                      <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+                    </button>
                   </div>
-                  
-                  {/* Floating Action Button */}
-                  <button
-                    onClick={() => addToCart(product)}
-                    className="absolute -bottom-2 -right-2 bg-[#F7DD0F] text-black p-3 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transform translate-y-2 group-hover:translate-y-0 transition-all duration-200 hover:scale-110 hover:shadow-xl touch-target"
-                  >
-                    <Plus className="w-5 h-5" />
-                  </button>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </div>

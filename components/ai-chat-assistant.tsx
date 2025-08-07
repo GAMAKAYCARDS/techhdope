@@ -210,7 +210,7 @@ export default function AIChatAssistant({ products, onAddToCart }: AIChatAssista
       {/* Mobile Chat Toggle Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 bg-[#F7DD0F] text-black p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 touch-manipulation"
+        className="fixed bottom-6 right-4 md:bottom-8 md:right-6 z-50 bg-[#F7DD0F] text-black p-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-110 touch-manipulation ai-chat-assistant"
         style={{ minHeight: '56px', minWidth: '56px' }}
         aria-label="Open AI Chat Assistant"
       >
@@ -219,7 +219,7 @@ export default function AIChatAssistant({ products, onAddToCart }: AIChatAssista
 
       {/* Mobile Chat Window */}
       {isOpen && (
-        <div className="fixed bottom-20 left-2 right-2 z-50 md:bottom-20 md:right-6 md:left-auto md:transform-none md:w-80 md:h-96 bg-white dark:bg-[#1a1a1a] rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden" style={{ height: '70vh', maxHeight: '500px', minHeight: '300px' }}>
+        <div className="fixed bottom-24 left-2 right-2 z-50 md:bottom-24 md:right-6 md:left-auto md:transform-none md:w-80 md:h-96 bg-white dark:bg-[#1a1a1a] rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col overflow-hidden" style={{ height: '70vh', maxHeight: '500px', minHeight: '300px' }}>
           {/* Header */}
           <div className="flex items-center justify-between p-2 sm:p-3 md:p-4 border-b border-gray-200 dark:border-gray-700 bg-gradient-to-r from-[#F7DD0F] to-yellow-400 rounded-t-2xl flex-shrink-0">
             <div className="flex items-center space-x-2 sm:space-x-3 min-w-0 flex-1">

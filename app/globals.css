@@ -364,7 +364,14 @@ body::-webkit-scrollbar {
 
 .product-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* Mobile-optimized card shadows */
+@media (max-width: 640px) {
+  .shadow-lg {
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  }
 }
 
 /* Optimized buttons */
@@ -408,6 +415,54 @@ body::-webkit-scrollbar {
     font-size: 0.875rem;
     line-height: 1.25rem;
   }
+  
+  /* Mobile-specific spacing */
+  .mobile-product-card {
+    margin-bottom: 1.5rem;
+  }
+  
+  /* Ensure chat icon doesn't overlap */
+  .ai-chat-assistant {
+    bottom: 1rem;
+    right: 1rem;
+    z-index: 40;
+  }
+  
+  /* Better touch targets */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Improved line height for readability */
+  .leading-relaxed {
+    line-height: 1.6;
+  }
+  
+  /* Better contrast for mobile */
+  .text-gray-400 {
+    color: rgba(156, 163, 175, 0.9);
+  }
+  
+  /* Button tap animation */
+  .active\:scale-95:active {
+    transform: scale(0.95);
+  }
+  
+  .active\:shadow-xl:active {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+  
+  /* Improved card padding */
+  .p-4 {
+    padding: 1rem;
+  }
+  
+  /* Better touch targets */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
 }
 
 /* Optimized print styles */
@@ -435,6 +490,11 @@ body::-webkit-scrollbar {
   animation-play-state: paused;
 }
 
+/* Smooth scrolling behavior */
+html {
+  scroll-behavior: smooth;
+}
+
 /* Optimized reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -443,5 +503,9 @@ body::-webkit-scrollbar {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+  
+  html {
+    scroll-behavior: auto;
   }
 }
