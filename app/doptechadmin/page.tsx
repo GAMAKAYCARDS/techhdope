@@ -63,7 +63,7 @@ function EditProductForm({ product, onSave, onCancel }: EditProductFormProps) {
             type="text"
             value={editData.name}
             onChange={(e) => setEditData({...editData, name: e.target.value})}
-            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F7DD0F]"
+            className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F7DD0F]"
           />
         </div>
         
@@ -73,7 +73,7 @@ function EditProductForm({ product, onSave, onCancel }: EditProductFormProps) {
             type="text"
             value={editData.category}
             onChange={(e) => setEditData({...editData, category: e.target.value})}
-            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F7DD0F]"
+            className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F7DD0F]"
           />
         </div>
         
@@ -83,7 +83,7 @@ function EditProductForm({ product, onSave, onCancel }: EditProductFormProps) {
             type="number"
             value={editData.price}
             onChange={(e) => setEditData({...editData, price: parseFloat(e.target.value)})}
-            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F7DD0F]"
+            className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F7DD0F]"
           />
         </div>
         
@@ -93,7 +93,7 @@ function EditProductForm({ product, onSave, onCancel }: EditProductFormProps) {
             type="number"
             value={editData.originalPrice}
             onChange={(e) => setEditData({...editData, originalPrice: parseFloat(e.target.value)})}
-            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F7DD0F]"
+            className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F7DD0F]"
           />
         </div>
         
@@ -103,7 +103,7 @@ function EditProductForm({ product, onSave, onCancel }: EditProductFormProps) {
             value={editData.description}
             onChange={(e) => setEditData({...editData, description: e.target.value})}
             rows={3}
-            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F7DD0F]"
+            className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F7DD0F]"
           />
         </div>
         
@@ -113,7 +113,7 @@ function EditProductForm({ product, onSave, onCancel }: EditProductFormProps) {
             type="text"
             value={editData.image}
             onChange={(e) => setEditData({...editData, image: e.target.value})}
-            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F7DD0F]"
+            className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F7DD0F]"
           />
         </div>
         
@@ -126,7 +126,7 @@ function EditProductForm({ product, onSave, onCancel }: EditProductFormProps) {
             step="0.1"
             value={editData.rating}
             onChange={(e) => setEditData({...editData, rating: parseFloat(e.target.value)})}
-            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F7DD0F]"
+            className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F7DD0F]"
           />
         </div>
         
@@ -136,7 +136,7 @@ function EditProductForm({ product, onSave, onCancel }: EditProductFormProps) {
             type="number"
             value={editData.reviews}
             onChange={(e) => setEditData({...editData, reviews: parseInt(e.target.value)})}
-            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F7DD0F]"
+            className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F7DD0F]"
           />
         </div>
         
@@ -148,7 +148,7 @@ function EditProductForm({ product, onSave, onCancel }: EditProductFormProps) {
             max="100"
             value={editData.discount}
             onChange={(e) => setEditData({...editData, discount: parseInt(e.target.value)})}
-            className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F7DD0F]"
+            className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F7DD0F]"
           />
         </div>
         
@@ -158,7 +158,7 @@ function EditProductForm({ product, onSave, onCancel }: EditProductFormProps) {
               type="checkbox"
               checked={editData.inStock}
               onChange={(e) => setEditData({...editData, inStock: e.target.checked})}
-              className="rounded border-gray-600 bg-gray-700 text-[#F7DD0F] focus:ring-[#F7DD0F]"
+              className="rounded border-white/10 bg-white/5 text-[#F7DD0F] focus:ring-[#F7DD0F]"
             />
             <span className="text-sm font-medium">In Stock</span>
           </label>
@@ -174,7 +174,7 @@ function EditProductForm({ product, onSave, onCancel }: EditProductFormProps) {
         </button>
         <button
           onClick={onCancel}
-          className="flex-1 px-4 py-2 bg-gray-600 rounded-lg hover:bg-gray-700 transition-colors"
+          className="flex-1 px-4 py-2 bg-white/10 hover:bg-white/15 border border-white/10 rounded-lg transition-colors"
         >
           Cancel
         </button>
@@ -436,6 +436,8 @@ export default function DopeTechAdmin() {
       try {
         localStorage.removeItem("adminAuthenticated")
         localStorage.removeItem("adminLoginTime")
+        // Force navigation back to the login screen to ensure a clean state
+        window.location.href = '/doptechadmin/'
       } catch (error) {
         console.error("Error clearing admin session:", error)
       }
@@ -628,17 +630,17 @@ export default function DopeTechAdmin() {
   // Login Screen
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="bg-gray-800 border border-gray-700 rounded-2xl p-8 w-full max-w-md mx-4">
+      <div className="min-h-screen bg-gradient-to-br from-[#0f0f0f] to-[#1a1a1a] flex items-center justify-center px-4">
+        <div className="w-full max-w-md rounded-2xl border border-white/10 bg-[#141414]/80 backdrop-blur-md shadow-2xl p-8">
           <div className="text-center mb-8">
-            <div className="flex items-center justify-center mb-4">
-              <Lock className="w-12 h-12 text-[#F7DD0F]" />
+            <div className="flex items-center justify-center mb-5">
+              <img src="/logo/dopelogo.svg" alt="DopeTech" className="w-14 h-14" />
             </div>
-            <h1 className="text-2xl font-bold text-white mb-2">DopeTech Admin</h1>
+            <h1 className="text-3xl font-extrabold text-white mb-2 tracking-tight">DopeTech Admin</h1>
             <p className="text-gray-400">Secure access to admin panel</p>
           </div>
           
-          <div className="space-y-4">
+          <div className="space-y-5">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">Admin Password</label>
               <input
@@ -646,41 +648,23 @@ export default function DopeTechAdmin() {
                 value={adminPassword}
                 onChange={(e) => setAdminPassword(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleAdminLogin()}
-                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F7DD0F] text-white"
+                className="w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#F7DD0F] focus:border-transparent"
                 placeholder="Enter admin password"
                 autoFocus
               />
             </div>
             
-                         <button
-               onClick={handleAdminLogin}
-               className="w-full px-4 py-3 bg-[#F7DD0F] text-black rounded-lg hover:bg-[#F7DD0F]/90 transition-colors font-medium"
-             >
-               Login to Admin Panel
-             </button>
-             
-             <button
-               onClick={() => {
-                 if (typeof window !== 'undefined') {
-                   try {
-                     localStorage.removeItem("adminAuthenticated")
-                     localStorage.removeItem("adminLoginTime")
-                   } catch (error) {
-                     console.error("Error clearing session:", error)
-                   }
-                 }
-                 setIsAuthenticated(false)
-                 setAdminPassword("")
-               }}
-               className="w-full px-4 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium"
-             >
-               Clear Session (Debug)
-             </button>
-            
+            <button
+              onClick={handleAdminLogin}
+              className="w-full px-4 py-3 rounded-xl bg-[#F7DD0F] text-black font-semibold hover:bg-[#F7DD0F]/90 transition-colors shadow-lg hover:shadow-[#F7DD0F]/20"
+            >
+              Login to Admin Panel
+            </button>
+
             <div className="text-center">
               <a 
                 href="/"
-                className="flex items-center justify-center space-x-2 text-gray-400 hover:text-white transition-colors"
+                className="inline-flex items-center justify-center gap-2 text-gray-400 hover:text-white transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
                 <span>Back to Main Site</span>
@@ -694,9 +678,9 @@ export default function DopeTechAdmin() {
 
   // Admin Dashboard
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen text-white gradient-bg">
       {/* Header */}
-      <header className="bg-gray-800 border-b border-gray-700">
+      <header className="bg-black/40 backdrop-blur-md border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-4 sm:space-y-0">
             <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
@@ -709,7 +693,7 @@ export default function DopeTechAdmin() {
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-4 w-full sm:w-auto">
               <a 
                 href="/"
-                className="flex items-center justify-center space-x-2 px-3 sm:px-4 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg transition-colors text-sm"
+                className="flex items-center justify-center space-x-2 px-3 sm:px-4 py-2 bg-white/10 hover:bg-white/15 border border-white/10 rounded-lg transition-colors text-sm"
               >
                 <ArrowLeft className="w-4 h-4" />
                 <span>View Site</span>
@@ -729,7 +713,7 @@ export default function DopeTechAdmin() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Analytics Dashboard */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-6 sm:mb-8">
-          <div className="bg-gradient-to-br from-gray-800 to-gray-700 rounded-xl p-4 sm:p-6 border border-gray-600 hover:border-[#F7DD0F]/30 transition-all duration-300 hover:shadow-lg hover:shadow-[#F7DD0F]/10">
+          <div className="rounded-xl p-4 sm:p-6 border border-white/10 bg-white/5 hover:border-[#F7DD0F]/30 transition-all duration-300 hover:shadow-lg hover:shadow-[#F7DD0F]/10">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-400 text-xs sm:text-sm font-medium">Total Products</p>
@@ -741,7 +725,7 @@ export default function DopeTechAdmin() {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-gray-800 to-gray-700 rounded-xl p-4 sm:p-6 border border-gray-600 hover:border-green-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-green-500/10">
+          <div className="rounded-xl p-4 sm:p-6 border border-white/10 bg-white/5 hover:border-green-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-green-500/10">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-400 text-xs sm:text-sm font-medium">Total Sales</p>
@@ -753,7 +737,7 @@ export default function DopeTechAdmin() {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-gray-800 to-gray-700 rounded-xl p-4 sm:p-6 border border-gray-600 hover:border-blue-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/10">
+          <div className="rounded-xl p-4 sm:p-6 border border-white/10 bg-white/5 hover:border-blue-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/10">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-400 text-xs sm:text-sm font-medium">Total Views</p>
@@ -765,7 +749,7 @@ export default function DopeTechAdmin() {
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-gray-800 to-gray-700 rounded-xl p-4 sm:p-6 border border-gray-600 hover:border-purple-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/10">
+          <div className="rounded-xl p-4 sm:p-6 border border-white/10 bg-white/5 hover:border-purple-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/10">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-400 text-xs sm:text-sm font-medium">Interactions</p>
@@ -781,14 +765,14 @@ export default function DopeTechAdmin() {
         {/* Top Products & Recent Activity */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 mb-6 sm:mb-8">
           {/* Top Products */}
-          <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+          <div className="rounded-lg p-6 border border-white/10 bg-white/5">
             <h3 className="text-lg font-semibold mb-4 flex items-center space-x-2">
               <Star className="w-5 h-5 text-[#F7DD0F]" />
               <span>Top Products</span>
             </h3>
             <div className="space-y-3">
               {analytics.topProducts.map((product, index) => (
-                <div key={product.id} className="flex items-center space-x-3 p-3 bg-gray-700 rounded-lg">
+                <div key={product.id} className="flex items-center space-x-3 p-3 bg-white/5 rounded-lg border border-white/10">
                   <div className="w-8 h-8 bg-[#F7DD0F] text-black rounded-full flex items-center justify-center font-bold">
                     {index + 1}
                   </div>
@@ -806,14 +790,14 @@ export default function DopeTechAdmin() {
           </div>
 
           {/* Recent Activity */}
-          <div className="bg-gray-800 rounded-lg p-6 border border-gray-700">
+          <div className="rounded-lg p-6 border border-white/10 bg-white/5">
             <h3 className="text-lg font-semibold mb-4 flex items-center space-x-2">
               <BarChart3 className="w-5 h-5 text-[#F7DD0F]" />
               <span>Recent Activity</span>
             </h3>
             <div className="space-y-3">
               {analytics.recentActivity.map((activity) => (
-                <div key={activity.id} className="flex items-center space-x-3 p-3 bg-gray-700 rounded-lg">
+                <div key={activity.id} className="flex items-center space-x-3 p-3 bg-white/5 rounded-lg border border-white/10">
                   <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
                     activity.type === 'sale' ? 'bg-green-500' : 
                     activity.type === 'view' ? 'bg-blue-500' : 'bg-purple-500'
@@ -844,7 +828,7 @@ export default function DopeTechAdmin() {
          
 
                    {/* GIF Management */}
-          <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-8">
+          <div className="rounded-lg p-6 border border-white/10 bg-white/5 mb-8">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold">GIF Management</h2>
               <div className="flex items-center space-x-2">
@@ -857,7 +841,7 @@ export default function DopeTechAdmin() {
               {/* Current GIF Preview */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold">Current GIF</h3>
-                <div className="bg-gray-700 rounded-lg p-4">
+                 <div className="rounded-lg p-4 bg-white/5 border border-white/10">
                   <img 
                     src="/gif/doptechgif.gif" 
                     alt="Current Main GIF" 
@@ -870,7 +854,7 @@ export default function DopeTechAdmin() {
               {/* Upload New GIF */}
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold">Upload New GIF</h3>
-                <div className="bg-gray-700 rounded-lg p-4">
+                 <div className="rounded-lg p-4 bg-white/5 border border-white/10">
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium mb-2">GIF File</label>
@@ -932,14 +916,14 @@ export default function DopeTechAdmin() {
           </div>
 
           {/* Promo Grid Arrangement */}
-          <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-8">
+          <div className="rounded-lg p-6 border border-white/10 bg-white/5 mb-8">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-bold">Promo Grid Arrangement</h2>
               <div className="flex items-center gap-2">
                 <span className="text-xs text-gray-400 hidden sm:inline">Drag to reorder. First 6 appear on mobile; next 6 fill desktop extra row.</span>
                 <button
                   onClick={handleResetPromoOrder}
-                  className="px-3 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg text-sm"
+                   className="px-3 py-2 bg-white/10 hover:bg-white/15 border border-white/10 rounded-lg text-sm"
                 >
                   Reset Order
                 </button>
@@ -954,7 +938,7 @@ export default function DopeTechAdmin() {
                   onDragStart={() => handlePromoDragStart(index)}
                   onDragOver={handlePromoDragOver}
                   onDrop={() => handlePromoDrop(index)}
-                  className="relative overflow-hidden rounded-xl border border-gray-700 bg-gray-700/60 hover:bg-gray-700 transition-colors cursor-move"
+                   className="relative overflow-hidden rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 transition-colors cursor-move"
                   title={p.name}
                 >
                   <div className="absolute top-2 left-2 z-10 inline-flex items-center justify-center w-6 h-6 text-xs font-bold rounded-full bg-[#F7DD0F] text-black shadow">
@@ -971,7 +955,7 @@ export default function DopeTechAdmin() {
           </div>
 
           {/* Product Management */}
-          <div className="bg-gray-800 rounded-lg p-4 sm:p-6 border border-gray-700">
+          <div className="rounded-lg p-4 sm:p-6 border border-white/10 bg-white/5">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 space-y-3 sm:space-y-0">
               <h2 className="text-lg sm:text-xl font-bold">Product Management</h2>
               <div className="flex items-center space-x-2 sm:space-x-4">
@@ -996,7 +980,7 @@ export default function DopeTechAdmin() {
                  placeholder="Search products..."
                  value={searchQuery}
                  onChange={(e) => setSearchQuery(e.target.value)}
-                 className="w-full pl-10 pr-4 py-2.5 sm:py-3 sm:py-4 bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F7DD0F] focus:border-[#F7DD0F] transition-all duration-200 text-white placeholder-gray-400 text-sm sm:text-base"
+                 className="w-full pl-10 pr-4 py-2.5 sm:py-3 sm:py-4 bg-white/5 border border-white/10 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#F7DD0F] focus:border-[#F7DD0F] transition-all duration-200 text-white placeholder-gray-400 text-sm sm:text-base"
                />
              </div>
            </div>
@@ -1004,7 +988,7 @@ export default function DopeTechAdmin() {
           {/* Add Product Modal */}
           {isAddingProduct && (
             <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-              <div className="bg-gray-800 rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+              <div className="rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto border border-white/10 bg-[#141414]/80 backdrop-blur-md">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-semibold">Add New Product</h3>
                   <button
@@ -1148,7 +1132,7 @@ export default function DopeTechAdmin() {
             {/* Mobile Cards View */}
             <div className="block lg:hidden space-y-4">
               {filteredProducts.map((product) => (
-                <div key={product.id} className="bg-gray-700 rounded-lg p-4 border border-gray-600">
+                <div key={product.id} className="rounded-lg p-4 border border-white/10 bg-white/5">
                   <div className="flex items-start space-x-3 mb-3">
                     <img src={product.image} alt={product.name} className="w-16 h-16 rounded object-cover flex-shrink-0" />
                     <div className="flex-1 min-w-0">
@@ -1185,24 +1169,26 @@ export default function DopeTechAdmin() {
                   </div>
                   
                   {/* Mobile Actions */}
-                  <div className="flex items-center justify-end space-x-2 pt-3 border-t border-gray-600">
+                  <div className="flex items-center justify-end space-x-2 pt-3 border-t border-white/10">
                     <button
                       onClick={() => handleEditProduct(product.id)}
-                      className="px-3 py-2 bg-blue-500/10 hover:bg-blue-500/20 rounded-lg transition-all duration-200 text-blue-400 text-sm"
+                      className="px-3 py-2 bg-blue-500/10 hover:bg-blue-500/20 rounded-lg transition-all duration-200 text-blue-400 text-sm flex items-center space-x-1"
                     >
                       <Edit className="w-4 h-4" />
+                      <span>Edit</span>
                     </button>
                     <button
                       onClick={() => handleDeleteProduct(product.id)}
-                      className="px-3 py-2 bg-red-500/10 hover:bg-red-500/20 rounded-lg transition-all duration-200 text-red-400 text-sm"
+                      className="px-3 py-2 bg-red-500/10 hover:bg-red-500/20 rounded-lg transition-all duration-200 text-red-400 text-sm flex items-center space-x-1"
                     >
                       <Trash2 className="w-4 h-4" />
+                      <span>Delete</span>
                     </button>
                   </div>
                   
                   {/* Edit Product Form - Mobile */}
                   {product.isEditing && (
-                    <div className="mt-4 p-4 bg-gray-800 rounded-lg border border-gray-600">
+                    <div className="mt-4 p-4 rounded-lg border border-white/10 bg-white/5">
                       <div className="flex items-center justify-between mb-4">
                         <h4 className="text-base font-semibold">Edit Product</h4>
                         <button
@@ -1257,7 +1243,7 @@ export default function DopeTechAdmin() {
                   <tbody>
                     {filteredProducts.map((product) => (
                       <React.Fragment key={product.id}>
-                        <tr className="border-b border-gray-700 hover:bg-gray-700/50">
+                        <tr className="border-b border-white/10 hover:bg-white/5">
                           <td className="py-3 px-4">
                             <div className="flex items-center space-x-3">
                               <img src={product.image} alt={product.name} className="w-10 h-10 rounded object-cover" />
@@ -1268,7 +1254,7 @@ export default function DopeTechAdmin() {
                             </div>
                           </td>
                           <td className="py-3 px-4">
-                            <span className="px-2 py-1 bg-gray-700 rounded text-xs">{product.category}</span>
+                            <span className="px-2 py-1 bg-white/10 rounded text-xs border border-white/10">{product.category}</span>
                           </td>
                           <td className="py-3 px-4">
                             <div>
@@ -1312,9 +1298,9 @@ export default function DopeTechAdmin() {
                         
                         {/* Edit Product Form */}
                         {product.isEditing && (
-                          <tr key={`edit-${product.id}`} className="bg-gray-700/50">
+                          <tr key={`edit-${product.id}`} className="bg-white/5">
                             <td colSpan={6} className="py-4 px-4">
-                              <div className="bg-gray-800 rounded-lg p-4 border border-gray-600">
+                              <div className="rounded-lg p-4 border border-white/10 bg-white/5">
                                 <div className="flex items-center justify-between mb-4">
                                   <h4 className="text-lg font-semibold">Edit Product</h4>
                                   <button
@@ -1360,7 +1346,7 @@ export default function DopeTechAdmin() {
             {/* Enhanced Mobile Product Cards */}
             <div className="lg:hidden space-y-4">
               {filteredProducts.map((product) => (
-                <div key={product.id} className="bg-gradient-to-br from-gray-700 to-gray-600 rounded-xl p-4 border border-gray-600 hover:border-[#F7DD0F]/30 transition-all duration-300 hover:shadow-lg">
+                <div key={product.id} className="rounded-xl p-4 border border-white/10 bg-white/5 hover:border-[#F7DD0F]/30 transition-all duration-300 hover:shadow-lg">
                   <div className="flex items-start space-x-3 mb-4">
                     <img src={product.image} alt={product.name} className="w-16 h-16 rounded-lg object-cover flex-shrink-0 shadow-md" />
                     <div className="flex-1 min-w-0">
@@ -1410,7 +1396,7 @@ export default function DopeTechAdmin() {
                   
                   {/* Edit Product Form for Mobile */}
                   {product.isEditing && (
-                    <div className="mt-4 bg-gray-800 rounded-lg p-4 border border-gray-600">
+                    <div className="mt-4 rounded-lg p-4 border border-white/10 bg-white/5">
                       <div className="flex items-center justify-between mb-4">
                         <h4 className="text-base font-semibold">Edit Product</h4>
                         <button

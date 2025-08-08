@@ -730,33 +730,33 @@ export default function DopeTechEcommerce() {
 
       {/* Enhanced Mobile Navigation */}
       <header className="fixed top-0 left-0 right-0 z-50 dopetech-nav animate-fade-in-down">
-        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-1">
-          <nav className="flex items-center justify-between h-auto min-h-10">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8 py-3">
+          <nav className="flex items-center justify-between h-auto min-h-16">
             {/* Left Side - Logo */}
             <div className="flex items-center space-x-1 sm:space-x-2 md:space-x-3 min-w-0 flex-1 pt-1">
-              <img src="/images/dtechnepal.svg" alt="DopeTech" className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10 logo-adaptive flex-shrink-0" />
+              <img src="/logo/dopelogo.svg" alt="DopeTech" className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 logo-adaptive flex-shrink-0 origin-left scale-[1.3]" />
 
 
             </div>
 
             {/* Right Side - Controls */}
-            <div className="flex items-center justify-end space-x-1.5 sm:space-x-2 md:space-x-2 lg:space-x-3 flex-shrink-0 pt-1">
+            <div className="flex items-center justify-end space-x-2 sm:space-x-3 md:space-x-4 lg:space-x-5 flex-shrink-0 pt-1">
               {/* Search Toggle */}
               <button
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
-                className="nav-icon-button nav-icon-elevated p-2 sm:p-2 md:p-2 touch-target flex items-center justify-center hover-scale mobile-nav-button"
+                className="p-2 touch-target flex items-center justify-center"
                 aria-label="Search"
               >
-                <Search className="w-5 h-5 sm:w-5 sm:h-5 md:w-5 md:h-5 hover:text-[#F7DD0F] transition-colors" />
+                <Search className="w-6 h-6 sm:w-6 sm:h-6 md:w-6 md:h-6 hover:text-[#F7DD0F] transition-colors" />
               </button>
 
               {/* Shopping Cart with Badge */}
               <button 
                 onClick={() => setCartOpen(true)}
-                className="nav-icon-button nav-icon-elevated relative p-2 sm:p-2 md:p-2 touch-target flex items-center justify-center hover-scale mobile-nav-button" 
+                className="relative p-2 touch-target flex items-center justify-center" 
                 aria-label="Shopping Cart"
               >
-                <ShoppingBag className="w-5 h-5 sm:w-5 sm:h-5 md:w-5 md:h-5 hover:text-[#F7DD0F] transition-colors" />
+                <ShoppingBag className="w-6 h-6 sm:w-6 sm:h-6 md:w-6 md:h-6 hover:text-[#F7DD0F] transition-colors" />
                 {getCartCount() > 0 && (
                   <span className="absolute -top-1 -right-1 sm:-top-1 sm:-right-1 md:-top-2 md:-right-2 bg-[#F7DD0F] text-black text-xs rounded-full w-5 h-5 sm:w-5 sm:h-5 md:w-6 md:h-6 flex items-center justify-center font-bold animate-bounce">
                     {getCartCount()}
@@ -769,25 +769,23 @@ export default function DopeTechEcommerce() {
                 href="https://www.instagram.com/dopetech_np/?hl=ne"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="nav-icon-button nav-icon-elevated p-2 sm:p-2 md:p-2 touch-target flex items-center justify-center hover-scale mobile-nav-button"
+                className="p-2 touch-target flex items-center justify-center"
                 aria-label="Instagram"
               >
-                <Instagram className="w-5 h-5 sm:w-5 sm:h-5 md:w-5 md:h-5 hover:text-[#F7DD0F] transition-colors" />
+                <Instagram className="w-6 h-6 sm:w-6 sm:h-6 md:w-6 md:h-6 hover:text-[#F7DD0F] transition-colors" />
               </a>
-
-
 
               {/* Mobile Menu Toggle */}
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="md:hidden nav-icon-button nav-icon-elevated p-2 touch-target flex items-center justify-center hover-scale mobile-nav-button"
+                className="md:hidden p-2 touch-target flex items-center justify-center"
                 aria-label="Menu"
                 data-mobile-menu
               >
                 {isMobileMenuOpen ? (
-                  <X className="w-5 h-5 hover:text-[#F7DD0F] transition-colors animate-scale-in" />
+                  <X className="w-6 h-6 hover:text-[#F7DD0F] transition-colors animate-scale-in" />
                 ) : (
-                  <Menu className="w-5 h-5 hover:text-[#F7DD0F] transition-colors" />
+                  <Menu className="w-6 h-6 hover:text-[#F7DD0F] transition-colors" />
                 )}
               </button>
             </div>
@@ -850,14 +848,6 @@ export default function DopeTechEcommerce() {
                     }`}
                     style={{ minHeight: '56px' }}
                   >
-                    {typeof category.icon === 'object' && 'type' in category.icon && (category.icon as any).type === 'svg' ? (
-                      <SvgIcon 
-                        svgContent={(category.icon as { type: 'svg', content: string }).content} 
-                        className="w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 mobile-icon" 
-                      />
-                    ) : (
-                      renderCategoryIcon(category.icon, "w-5 h-5 sm:w-6 sm:h-6 flex-shrink-0 mobile-icon")
-                    )}
                     <span className="font-medium text-base sm:text-lg">{category.name}</span>
                   </button>
                 ))}
@@ -978,14 +968,6 @@ export default function DopeTechEcommerce() {
                       }`}
                       aria-label={`Filter by ${category.name}`}
                     >
-                      {typeof category.icon === 'object' && 'type' in category.icon && (category.icon as any).type === 'svg' ? (
-                        <SvgIcon 
-                          svgContent={(category.icon as { type: 'svg', content: string }).content} 
-                          className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" 
-                        />
-                      ) : (
-                        renderCategoryIcon(category.icon, "w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5")
-                      )}
                       <span>{category.name}</span>
                     </button>
                   </div>
@@ -1008,14 +990,6 @@ export default function DopeTechEcommerce() {
                       }`}
                       aria-label={`Filter by ${category.name}`}
                     >
-                      {typeof category.icon === 'object' && 'type' in category.icon && (category.icon as any).type === 'svg' ? (
-                        <SvgIcon 
-                          svgContent={(category.icon as { type: 'svg', content: string }).content} 
-                          className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5" 
-                        />
-                      ) : (
-                        renderCategoryIcon(category.icon, "w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5")
-                      )}
                       <span>{category.name}</span>
                     </button>
                   </div>
@@ -1375,7 +1349,7 @@ export default function DopeTechEcommerce() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-3 mb-6 md:mb-0">
-              <img src="/images/dtechnepal.svg" alt="DopeTech" className="w-8 h-8 sm:w-10 sm:h-10 logo-adaptive" />
+              <img src="/logo/dopelogo.svg" alt="DopeTech" className="w-10 h-10 sm:w-12 sm:h-12 logo-adaptive" />
               <span className="text-xs sm:text-sm text-white jakarta-light">© 2025 DopeTech Nepal. All rights reserved.</span>
             </div>
 
@@ -1396,26 +1370,36 @@ export default function DopeTechEcommerce() {
 
 
 
-      {/* Back to Category Filters floating button */}
+      {/* Jump to Categories floating button */}
       {showBackToCategories && (
         <button
           onClick={scrollToCategoryFilters}
           className="fixed right-4 md:right-6 bottom-24 md:bottom-28 z-50 flex items-center gap-2 px-4 py-3 rounded-full glass-dark border border-white/10 shadow-2xl hover:shadow-[0_12px_30px_rgba(247,221,15,0.25)] transition-all duration-200 hover:scale-105"
-          aria-label="Back to category filters"
+          aria-label="Jump to categories"
         >
           {/* Circle icon wrapper styled like the chat icon */}
-          <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#F7DD0F] text-black shadow-lg">
+          <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#F7DD0F] text-black shadow-lg overflow-hidden">
             {(() => {
               const item = categories[categoryIconIndex]
               if (!item) return null
+              const key = `${item.id}-${categoryIconIndex}`
+              const commonClasses = "w-5 h-5 animate-fade-in animate-scale-in will-change-opacity will-change-transform"
               if (typeof item.icon === 'object' && 'type' in item.icon && (item.icon as any).type === 'svg') {
-                return <SvgIcon svgContent={(item.icon as { type: 'svg', content: string }).content} className="w-5 h-5" />
+                return (
+                  <span key={key} className="inline-flex items-center justify-center">
+                    <SvgIcon svgContent={(item.icon as { type: 'svg', content: string }).content} className={commonClasses} />
+                  </span>
+                )
               }
               const IconComp = item.icon as React.ComponentType<{ className?: string }>
-              return <IconComp className="w-5 h-5" />
+              return (
+                <span key={key} className="inline-flex items-center justify-center">
+                  <IconComp className={commonClasses} />
+                </span>
+              )
             })()}
           </span>
-          <span className="text-sm font-bold">Back to Filters</span>
+          <span className="text-sm font-bold">Jump to Categories</span>
         </button>
       )}
 

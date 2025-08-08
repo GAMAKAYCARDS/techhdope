@@ -26,14 +26,14 @@ export default function HeroSection({ cartCount, onCartClick }: HeroSectionProps
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           {/* Logo */}
                      <div className="flex items-center space-x-2 md:space-x-3">
-             <Image
-               src="/images/dtechnepal.svg"
-               alt="DopeTech"
-               width={320}
-               height={320}
-               className="w-64 h-64 md:w-80 md:h-80 logo-adaptive hover-scale"
-               style={{ minWidth: '256px', minHeight: '256px' }}
-             />
+            <Image
+              src="/logo/dopelogo.svg"
+              alt="DopeTech"
+              width={320}
+              height={320}
+              className="w-64 h-64 md:w-80 md:h-80 logo-adaptive hover-scale"
+              style={{ minWidth: '256px', minHeight: '256px' }}
+            />
            </div>
 
           {/* Desktop Search and Cart */}
