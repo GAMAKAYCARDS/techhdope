@@ -95,6 +95,9 @@ export default function DopeTechEcommerce() {
   const [isCategoryInView, setIsCategoryInView] = useState(true)
   const [categoryIconIndex, setCategoryIconIndex] = useState(0)
   const [headerOffset, setHeaderOffset] = useState<number>(72)
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [promoOrder, setPromoOrder] = useState<number[]>([])
+  const [draggedPromoIndex, setDraggedPromoIndex] = useState<number | null>(null)
 
   const [userBehavior, setUserBehavior] = useState({
     viewedProducts: [] as number[],
@@ -172,6 +175,24 @@ export default function DopeTechEcommerce() {
       } catch (error) {
         console.error('Error accessing localStorage:', error)
       }
+    }
+  }, [])
+
+  // Initialize admin mode and promo order preferences
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    try {
+      const flag = localStorage.getItem('adminAuthenticated') === 'true'
+      setIsAdmin(!!flag)
+      const stored = localStorage.getItem('promoOrderV1')
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        if (Array.isArray(parsed)) {
+          setPromoOrder(parsed.filter((id: any) => Number.isFinite(id)))
+        }
+      }
+    } catch (e) {
+      console.error('Error reading admin/promo order:', e)
     }
   }, [])
 
@@ -440,6 +461,57 @@ export default function DopeTechEcommerce() {
     })
   }, [currentProducts, searchQuery, selectedCategory])
 
+  // Lightweight set of promo products for the top cards (hiddenOnHome excluded)
+  // Always fill to a max of 6 items deterministically (no Math.random for SSR safety)
+  // Apply admin-defined ordering if available
+  const promoProducts = useMemo(() => {
+    const PROMO_CARD_MAX = 6
+    const visible = currentProducts.filter((p) => !(p as any).hiddenOnHome)
+    // Reorder by admin preference
+    const orderSet = new Set(promoOrder)
+    const orderedByAdmin = [
+      ...promoOrder
+        .map((id) => visible.find((p) => p.id === id))
+        .filter((p): p is Product => !!p),
+      ...visible.filter((p) => !orderSet.has(p.id)),
+    ]
+    const base = orderedByAdmin.slice(0, PROMO_CARD_MAX)
+    if (base.length === PROMO_CARD_MAX) return base
+    const remaining = PROMO_CARD_MAX - base.length
+    const restPool = orderedByAdmin.slice(base.length)
+    const extras: Product[] = []
+    // Prefer unused visible items first
+    for (let i = 0; i < remaining && i < restPool.length; i++) {
+      extras.push(restPool[i])
+    }
+    // If still short, repeat from base with a deterministic offset
+    if (extras.length < remaining && base.length > 0) {
+      const start = currentProducts.length % base.length
+      for (let i = 0; extras.length < remaining; i++) {
+        const idx = (start + i) % base.length
+        extras.push(base[idx])
+      }
+    }
+    return [...base, ...extras]
+  }, [currentProducts, promoOrder])
+
+  // Desktop-only extra promo grid (up to 6 additional squares, avoid duplicates when possible)
+  const promoProductsDesktopExtra = useMemo(() => {
+    const EXTRA_MAX = 6
+    const visible = currentProducts.filter((p) => !(p as any).hiddenOnHome)
+    const orderSet = new Set(promoOrder)
+    const orderedByAdmin = [
+      ...promoOrder
+        .map((id) => visible.find((p) => p.id === id))
+        .filter((p): p is Product => !!p),
+      ...visible.filter((p) => !orderSet.has(p.id)),
+    ]
+    // Skip the first 6 used in the main grid
+    const start = 6
+    const extra = orderedByAdmin.slice(start, start + EXTRA_MAX)
+    return extra
+  }, [currentProducts, promoOrder])
+
   // Debug logging removed for performance
 
   // Get categories from localStorage or use defaults
@@ -467,6 +539,85 @@ export default function DopeTechEcommerce() {
     }
     const IconComp = icon as React.ComponentType<{ className?: string }>
     return <IconComp className={className} />
+  }
+
+  // Promo card shape options and deterministic picker
+  // Use a consistent radius across all promo cards to avoid visual unevenness
+  const promoShapeOptions = [
+    "rounded-2xl",
+  ] as const
+
+  // Deterministic shape picker to avoid hydration mismatches (SSR = Client)
+  // Still gives variety across items by using id + index salt.
+  const getPromoShape = (id: number, index: number) => {
+    const seed = Number.isFinite(id) ? id + index * 7 : index
+    const idx = Math.abs(seed) % promoShapeOptions.length
+    return promoShapeOptions[idx]
+  }
+
+  // Mosaic layout for exactly up to 6 items (desktop-friendly, no gaps)
+  // xs: all squares; sm+: hero + vertical + horizontals arranged to fill 3 columns
+  const getPromoLayout = (index: number, total: number) => {
+    // Always squares on xs
+    const xs = "col-span-1 row-span-1"
+    if (total <= 4) {
+      return { wrapper: xs, ratio: "" }
+    }
+    if (total === 5) {
+      // Layout for 5: hero(2x2), one vertical, two squares
+      const map = [
+        `${xs} sm:col-span-2 sm:row-span-2`, // 0 hero
+        `${xs} sm:col-span-1 sm:row-span-2`, // 1 vertical
+        xs,                                   // 2 square
+        xs,                                   // 3 square
+        xs,                                   // 4 square
+      ]
+      return { wrapper: map[index % 5], ratio: "" }
+    }
+    // total >= 6 (we cap at 6)
+    // Layout for 6: hero(2x2), vertical(1x2), horizontal(2x1), square, horizontal(2x1), square
+    // This produces two fully-filled rows after the top block (no gaps)
+    const map6 = [
+      `${xs} sm:col-span-2 sm:row-span-2`, // 0 hero
+      `${xs} sm:col-span-1 sm:row-span-2`, // 1 vertical
+      `${xs} sm:col-span-2 sm:row-span-1`, // 2 horizontal
+      xs,                                   // 3 square
+      `${xs} sm:col-span-2 sm:row-span-1`, // 4 horizontal
+      xs,                                   // 5 square
+    ]
+    return { wrapper: map6[index % 6], ratio: "" }
+  }
+
+  // Admin drag helpers
+  const handlePromoDragStart = (index: number) => {
+    if (!isAdmin) return
+    setDraggedPromoIndex(index)
+  }
+
+  const handlePromoDragOver = (e: React.DragEvent) => {
+    if (!isAdmin) return
+    e.preventDefault()
+  }
+
+  const handlePromoDrop = (dropIndex: number) => {
+    if (!isAdmin) return
+    if (draggedPromoIndex === null || draggedPromoIndex === dropIndex) return
+    // Combine both grids for unified ordering on desktop
+    const currentIds = [...promoProducts, ...promoProductsDesktopExtra].map((p) => p.id)
+    const moved = [...currentIds]
+    const [m] = moved.splice(draggedPromoIndex, 1)
+    if (m === undefined) return
+    moved.splice(Math.min(dropIndex, moved.length), 0, m)
+    // Merge moved order to the front of existing preference
+    const merged = [...moved, ...promoOrder.filter((id) => !moved.includes(id))]
+    setPromoOrder(merged)
+    try {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('promoOrderV1', JSON.stringify(merged))
+        window.dispatchEvent(new Event('promoOrderUpdated'))
+      }
+    } catch {}
+    setDraggedPromoIndex(null)
   }
 
   const getCategories = () => {
@@ -728,8 +879,8 @@ export default function DopeTechEcommerce() {
               Premium Tech Gear from <span className="text-[#F7DD0F] animate-float">DopeTech</span> Nepal
             </p>
             
-            {/* Autoplay GIF with Borderless Glow - Rounded pill container */}
-            <div className="w-full max-w-5xl mx-auto mt-4 sm:mt-6 md:mt-8 mb-4 sm:mb-6 md:mb-6 animate-fade-in-up stagger-3 borderless-glow cv-auto rounded-full overflow-hidden ring-1 ring-white/10">
+            {/* Autoplay GIF with Borderless Glow - Rectangular container */}
+            <div className="w-full mx-auto mt-4 sm:mt-6 md:mt-8 mb-4 sm:mb-6 md:mb-6 animate-fade-in-up stagger-3 borderless-glow cv-auto rounded-2xl overflow-hidden ring-1 ring-white/10">
               <img
                 src={(() => {
                   if (typeof window !== 'undefined') {
@@ -748,15 +899,72 @@ export default function DopeTechEcommerce() {
                   return "/gif/doptechgif.gif"
                 })()}
                 alt="DopeTech Introduction"
-                className="w-full h-44 sm:h-40 md:h-44 lg:h-48 xl:h-56 shadow-xl object-cover object-center"
+                className="w-full h-36 sm:h-48 md:h-56 lg:h-64 xl:h-72 shadow-xl object-cover object-center"
                 loading="lazy"
                 decoding="async"
                 key={animationKey}
               />
             </div>
 
+            {/* Promo Cards Row (above categories) */}
+            <div className="grid max-w-3xl mx-auto grid-cols-3 sm:grid-cols-3 md:grid-cols-3 grid-flow-dense auto-rows-[90px] sm:auto-rows-[110px] md:auto-rows-[120px] gap-1.5 sm:gap-2 md:gap-3 mb-4 sm:mb-6 md:mb-8 animate-fade-in-up stagger-4">
+              {promoProducts.map((p, i) => {
+                const { wrapper } = getPromoLayout(i, promoProducts.length)
+                return (
+                  <a
+                    key={`${p.id}-${i}`}
+                    href="#products"
+                    draggable={isAdmin}
+                    onDragStart={() => handlePromoDragStart(i)}
+                    onDragOver={handlePromoDragOver}
+                    onDrop={() => handlePromoDrop(i)}
+                    className={`relative overflow-hidden border border-white/10 bg-white/5 hover:bg-white/10 transition-colors shadow-lg ${getPromoShape(p.id, i)} ${wrapper} ${isAdmin ? 'cursor-move' : ''}`}
+                    style={{ animationDelay: `${i * 0.06}s` }}
+                  >
+                    <div className="absolute inset-0">
+                      <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                    </div>
+                    <div className="relative p-3 sm:p-4 flex flex-col justify-end h-full">
+                      <p className="text-[11px] sm:text-xs text-white/80 font-semibold uppercase tracking-wide">Hot pick</p>
+                      <h3 className="text-white font-bold text-sm sm:text-base line-clamp-2">{p.name}</h3>
+                      <span className="text-[#F7DD0F] font-bold text-sm sm:text-base">Rs {p.price}</span>
+                    </div>
+                  </a>
+                )
+              })}
+            </div>
+
+            {/* Desktop-only: extra small promo grid (squares only, up to 6) */}
+            {promoProductsDesktopExtra.length > 0 && (
+              <div className="hidden md:grid max-w-3xl mx-auto grid-cols-3 auto-rows-[120px] gap-3 mb-6 animate-fade-in-up stagger-5">
+                {promoProductsDesktopExtra.map((p, i) => (
+                  <a
+                    key={`extra-${p.id}-${i}`}
+                    href="#products"
+                    draggable={isAdmin}
+                    onDragStart={() => handlePromoDragStart(i + promoProducts.length)}
+                    onDragOver={handlePromoDragOver}
+                    onDrop={() => handlePromoDrop(i + promoProducts.length)}
+                    className={`relative overflow-hidden border border-white/10 bg-white/5 hover:bg-white/10 transition-colors shadow-lg rounded-2xl col-span-1 row-span-1 ${isAdmin ? 'cursor-move' : ''}`}
+                    style={{ animationDelay: `${i * 0.05}s` }}
+                  >
+                    <div className="absolute inset-0">
+                      <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                    </div>
+                    <div className="relative p-4 flex flex-col justify-end h-full">
+                      <p className="text-xs text-white/80 font-semibold uppercase tracking-wide">Hot pick</p>
+                      <h3 className="text-white font-bold text-base line-clamp-2">{p.name}</h3>
+                      <span className="text-[#F7DD0F] font-bold text-base">Rs {p.price}</span>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            )}
+
             {/* Category Filter - Mobile Optimized with Smaller Touch Targets */}
-            <div ref={categorySectionRef} className="flex flex-wrap justify-center gap-2 sm:gap-3 md:gap-4 mb-6 sm:mb-8 md:mb-10 px-2 animate-fade-in-up stagger-4 hero-spacing">
+            <div ref={categorySectionRef} className="flex flex-wrap justify-center gap-2 sm:gap-3 md:gap-4 mb-6 sm:mb-8 md:mb-10 px-2 animate-fade-in-up stagger-5 hero-spacing">
               {/* First row */}
               <div className="flex flex-wrap justify-center gap-2 sm:gap-3 md:gap-4 w-full">
                 {categories.slice(0, 3).map((category, index) => (
@@ -826,19 +1034,53 @@ export default function DopeTechEcommerce() {
             }`}>
             {filteredProducts.map((product, index) => (
               <div key={product.id} className="group animate-fade-in-up mobile-product-card hover-lift" style={{ animationDelay: `${index * 0.1}s` }}>
-                <div className="dopetech-card p-4 sm:p-6 h-full flex flex-col premium-card hover-scale rounded-2xl shadow-lg border border-gray-200/10 backdrop-blur-sm">
+                <div className="dopetech-card p-3 sm:p-6 h-full flex flex-col premium-card hover-scale rounded-2xl shadow-lg border border-gray-200/10 backdrop-blur-sm">
                   {/* Product Image with Enhanced Hover Effects */}
-                  <div className="relative mb-4 sm:mb-5 image-container overflow-hidden rounded-xl">
+                  <div className="relative image-container overflow-hidden rounded-xl aspect-square sm:aspect-auto mb-2 sm:mb-5">
                       <img
                       src={product.image}
                       alt={product.name}
-                        className="w-full h-48 sm:h-56 md:h-64 object-cover transition-all duration-300 group-hover:scale-110 group-hover:rotate-1"
+                        className="absolute inset-0 w-full h-full object-cover object-center transition-all duration-300 group-hover:scale-110 group-hover:rotate-1 sm:static sm:w-full sm:h-56 md:h-64"
                         loading="lazy"
                         decoding="async"
                     />
                     
                     {/* Gradient Overlay on Hover */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent sm:opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                    {/* Mobile In-Stock badge at top-right */}
+                    {product.inStock && (
+                      <div className="absolute top-2 right-2 sm:hidden px-2 py-1 rounded-full text-[10px] font-medium bg-green-500/30 text-green-100 border border-green-500/40">
+                        In Stock
+                      </div>
+                    )}
+
+                    {/* Mobile overlay content */}
+                    <div className="absolute inset-x-0 bottom-0 p-2 sm:hidden">
+                      <h3 className="text-white font-semibold text-xs line-clamp-2 mb-1 leading-snug">{product.name}</h3>
+                      <div className="flex items-center justify-between">
+                        <div className="flex flex-col leading-tight">
+                          <span className="text-[#F7DD0F] font-bold text-sm">Rs {product.price}</span>
+                          {product.originalPrice > product.price && (
+                            <span className="text-[10px] text-gray-300 line-through">Rs {product.originalPrice}</span>
+                          )}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => addToCart(product)}
+                            disabled={!product.inStock}
+                            aria-label="Add to cart"
+                            className={`inline-flex items-center justify-center w-8 h-8 rounded-full shadow transition-transform active:scale-95 ${
+                              product.inStock
+                                ? "bg-[#F7DD0F] text-black hover:bg-[#F7DD0F]/90"
+                                : "bg-gray-500/40 text-gray-300 cursor-not-allowed"
+                            }`}
+                          >
+                            <Plus className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
 
                     {/* Stock Status Badge */}
                     {!product.inStock && (
@@ -848,7 +1090,7 @@ export default function DopeTechEcommerce() {
                     )}
                     
                     {/* Quick View Overlay */}
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="hidden sm:flex absolute inset-0 items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                       <div className="bg-black/80 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-medium">
                         Quick View
                       </div>
@@ -856,7 +1098,7 @@ export default function DopeTechEcommerce() {
                   </div>
 
                   {/* Product Info with Enhanced Typography */}
-                  <div className="flex-1 flex flex-col content">
+                  <div className="hidden sm:flex flex-1 flex-col content">
                     {/* Rating and Reviews removed */}
                     <div className="hidden" />
 
@@ -908,7 +1150,7 @@ export default function DopeTechEcommerce() {
                       <button
                         onClick={() => addToCart(product)}
                         disabled={!product.inStock}
-                        className={`w-full py-3 sm:py-4 px-4 rounded-xl font-semibold text-base sm:text-lg transition-all duration-300 touch-target button min-h-[48px] relative overflow-hidden group ${
+                        className={`hidden sm:block w-full py-3 sm:py-4 px-4 rounded-xl font-semibold text-base sm:text-lg transition-all duration-300 touch-target button min-h-[48px] relative overflow-hidden group ${
                           product.inStock
                             ? "bg-[#F7DD0F] text-black hover:bg-[#F7DD0F]/90 hover:scale-105 shadow-lg active:scale-95 active:shadow-xl hover:shadow-[#F7DD0F]/25"
                             : "bg-gray-300 text-gray-500 cursor-not-allowed"

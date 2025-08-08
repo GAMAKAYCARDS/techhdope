@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useMemo } from "react"
 import { 
   Plus, 
   Edit, 
@@ -250,6 +250,10 @@ export default function DopeTechAdmin() {
   const [gifUrl, setGifUrl] = useState("")
   const [isUploadingGif, setIsUploadingGif] = useState(false)
 
+  // Promo grid arrangement state
+  const [promoOrder, setPromoOrder] = useState<number[]>([])
+  const [draggedPromoIndex, setDraggedPromoIndex] = useState<number | null>(null)
+
   const [analytics, setAnalytics] = useState<Analytics>({
     totalProducts: allProducts.length,
     totalSales: 15420,
@@ -330,6 +334,76 @@ export default function DopeTechAdmin() {
       }
     }
   }, [])
+
+  // Load saved promo order
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    try {
+      const stored = localStorage.getItem('promoOrderV1')
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        if (Array.isArray(parsed)) {
+          setPromoOrder(parsed.filter((id: any) => Number.isFinite(id)))
+        }
+      }
+    } catch (e) {
+      console.error('Error loading promo order:', e)
+    }
+  }, [])
+
+  // Compute promo candidates and apply ordering (hiddenOnHome excluded)
+  const visiblePromoProducts = useMemo(() => {
+    const visible = products.filter((p: any) => !p.hiddenOnHome)
+    const orderSet = new Set(promoOrder)
+    return [
+      ...promoOrder
+        .map((id) => visible.find((p) => p.id === id))
+        .filter((p): p is AdminProduct => !!p),
+      ...visible.filter((p) => !orderSet.has(p.id)),
+    ]
+  }, [products, promoOrder])
+
+  // DnD handlers
+  const handlePromoDragStart = (index: number) => {
+    setDraggedPromoIndex(index)
+  }
+
+  const handlePromoDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+  }
+
+  const persistPromoOrder = (ids: number[]) => {
+    setPromoOrder(ids)
+    try {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('promoOrderV1', JSON.stringify(ids))
+        window.dispatchEvent(new Event('promoOrderUpdated'))
+      }
+    } catch {}
+  }
+
+  const handlePromoDrop = (dropIndex: number) => {
+    if (draggedPromoIndex === null || draggedPromoIndex === dropIndex) return
+    const ids = visiblePromoProducts.map((p) => p.id)
+    const next = [...ids]
+    const [moved] = next.splice(draggedPromoIndex, 1)
+    if (moved === undefined) return
+    next.splice(Math.min(dropIndex, next.length), 0, moved)
+    // Keep full priority list ordered; append any other known ids from previous order
+    const merged = [...next, ...promoOrder.filter((id) => !next.includes(id))]
+    persistPromoOrder(merged)
+    setDraggedPromoIndex(null)
+  }
+
+  const handleResetPromoOrder = () => {
+    setPromoOrder([])
+    try {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('promoOrderV1')
+        window.dispatchEvent(new Event('promoOrderUpdated'))
+      }
+    } catch {}
+  }
 
 
 
@@ -854,6 +928,45 @@ export default function DopeTechAdmin() {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Promo Grid Arrangement */}
+          <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 mb-8">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold">Promo Grid Arrangement</h2>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-400 hidden sm:inline">Drag to reorder. First 6 appear on mobile; next 6 fill desktop extra row.</span>
+                <button
+                  onClick={handleResetPromoOrder}
+                  className="px-3 py-2 bg-gray-600 hover:bg-gray-700 rounded-lg text-sm"
+                >
+                  Reset Order
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+              {visiblePromoProducts.map((p, index) => (
+                <div
+                  key={`promo-admin-${p.id}`}
+                  draggable
+                  onDragStart={() => handlePromoDragStart(index)}
+                  onDragOver={handlePromoDragOver}
+                  onDrop={() => handlePromoDrop(index)}
+                  className="relative overflow-hidden rounded-xl border border-gray-700 bg-gray-700/60 hover:bg-gray-700 transition-colors cursor-move"
+                  title={p.name}
+                >
+                  <div className="absolute top-2 left-2 z-10 inline-flex items-center justify-center w-6 h-6 text-xs font-bold rounded-full bg-[#F7DD0F] text-black shadow">
+                    {index + 1}
+                  </div>
+                  <img src={p.image} alt={p.name} className="w-full h-24 object-cover opacity-90" />
+                  <div className="p-2">
+                    <p className="text-xs font-medium line-clamp-2">{p.name}</p>
+                    <p className="text-xs text-gray-400">Rs {p.price}</p>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
 
