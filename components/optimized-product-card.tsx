@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useRef, useEffect } from "react"
-import { Plus, Star, Heart } from "lucide-react"
+import { Plus, Heart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 interface Product {
@@ -141,40 +141,48 @@ export default function OptimizedProductCard({
 
       {/* Content */}
       <div className="p-4 space-y-3">
-        {/* Category */}
-        <div className="flex items-center justify-between">
+        {/* Category (hidden on mobile) */}
+        <div className="hidden sm:flex items-center justify-between">
           <span className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
             {product.category}
           </span>
-          
-          {/* Rating */}
-          <div className="flex items-center space-x-1">
-            <Star className="w-3 h-3 text-yellow-400 fill-current" />
-            <span className="text-xs text-gray-600 dark:text-gray-400">
-              {product.rating || 0} ({product.reviews || 0})
-            </span>
-          </div>
         </div>
 
         {/* Product Name */}
         <h3 className="font-semibold text-gray-900 dark:text-white text-sm line-clamp-2">
           {product.name}
         </h3>
+        {/* Description (hidden on mobile) */}
+        <p className="hidden sm:block text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
+          {product.description}
+        </p>
 
-        {/* Price */}
-        <div className="flex items-center space-x-2">
-          <span className="text-lg font-bold text-[#F7DD0F]">
-            Rs {product.price.toLocaleString()}
-          </span>
-          {product.originalPrice > product.price && (
-            <span className="text-sm text-gray-500 line-through">
-              Rs {product.originalPrice.toLocaleString()}
-            </span>
-          )}
+        {/* Price + Discount (mobile-friendly) */}
+        <div>
+          <div className="flex items-start justify-between">
+            <div className="flex flex-col leading-tight">
+              <span className="text-lg font-bold text-[#F7DD0F]">
+                Rs {product.price.toLocaleString()}
+              </span>
+              {product.originalPrice > product.price && (
+                <span className="text-xs sm:text-sm text-gray-500 line-through">
+                  Rs {product.originalPrice.toLocaleString()}
+                </span>
+              )}
+            </div>
+            <div className={`px-2 py-1 rounded-full text-[10px] font-medium ${
+              product.inStock 
+                ? "bg-green-500/20 text-green-400 border border-green-500/30" 
+                : "bg-red-500/20 text-red-400 border border-red-500/30"
+            }`}>
+              {product.inStock ? "In Stock" : "Out of Stock"}
+            </div>
+          </div>
+          {/* Mobile discount removed as requested */}
         </div>
 
-        {/* Features */}
-        <div className="flex flex-wrap gap-1">
+        {/* Features (hidden on mobile) */}
+        <div className="hidden sm:flex flex-wrap gap-1">
           {product.features.slice(0, 2).map((feature, index) => (
             <span
               key={index}

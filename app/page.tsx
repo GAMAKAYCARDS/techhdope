@@ -10,7 +10,6 @@ import {
   ShoppingBag,
   Camera,
   Cable,
-  Star,
   Plus,
   Minus,
   X,
@@ -822,7 +821,7 @@ export default function DopeTechEcommerce() {
             data-products-section
             className={`grid gap-4 sm:gap-6 md:gap-8 mt-6 sm:mt-8 md:mt-10 cv-auto ${
               viewMode === "grid" 
-                ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" 
+                ? "grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" 
                 : "grid-cols-1"
             }`}>
             {filteredProducts.map((product, index) => (
@@ -858,35 +857,21 @@ export default function DopeTechEcommerce() {
 
                   {/* Product Info with Enhanced Typography */}
                   <div className="flex-1 flex flex-col content">
-                    {/* Rating and Reviews */}
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center space-x-1">
-                        {[...Array(5)].map((_, i) => (
-                          <Star
-                            key={i}
-                            className={`w-3 h-3 sm:w-4 sm:h-4 ${
-                              i < Math.floor(product.rating) ? "text-yellow-400 fill-current" : "text-gray-300"
-                            }`}
-                          />
-                        ))}
-                      </div>
-                      <span className="text-xs sm:text-sm text-gray-400">
-                        ({product.reviews} reviews)
-                      </span>
-                    </div>
+                    {/* Rating and Reviews removed */}
+                    <div className="hidden" />
 
                     {/* Product Title */}
                     <h3 className="font-bold text-base sm:text-lg mb-2 line-clamp-2 title leading-tight group-hover:text-[#F7DD0F] transition-colors duration-200">
                       {product.name}
                     </h3>
                     
-                    {/* Product Description */}
-                    <p className="text-sm text-gray-400 mb-3 line-clamp-2 leading-relaxed">
+                    {/* Product Description (hidden on mobile) */}
+                    <p className="hidden sm:block text-sm text-gray-400 mb-3 line-clamp-2 leading-relaxed">
                       {product.description}
                     </p>
 
-                    {/* Enhanced Features Display */}
-                    <div className="flex flex-wrap gap-1.5 sm:gap-2 mb-4">
+                    {/* Enhanced Features Display (hidden on mobile) */}
+                    <div className="hidden sm:flex flex-wrap gap-1.5 sm:gap-2 mb-4">
                       {product.features.slice(0, 2).map((feature, index) => (
                         <span
                           key={index}
@@ -899,17 +884,18 @@ export default function DopeTechEcommerce() {
 
                     {/* Enhanced Price and Action Section */}
                     <div className="mt-auto">
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center space-x-2">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex flex-col leading-tight">
                           <span className="text-lg sm:text-xl font-bold price text-[#F7DD0F]">Rs {product.price}</span>
                           {product.originalPrice > product.price && (
-                            <span className="text-sm text-gray-500 line-through">
+                            <span className="text-xs sm:text-sm text-gray-500 line-through">
                               Rs {product.originalPrice}
                             </span>
                           )}
                         </div>
+                        {/* Mobile discount removed as requested */}
                         
-                        {/* Stock Indicator */}
+                        {/* Stock Indicator (visible on mobile too) */}
                         <div className={`px-2 py-1 rounded-full text-xs font-medium ${
                           product.inStock 
                             ? "bg-green-500/20 text-green-400 border border-green-500/30" 
