@@ -24,6 +24,7 @@ import {
 import CursorTracker from "@/components/cursor-tracker"
 import LazyAIChat from "@/components/lazy-ai-chat"
 import SEOOptimizer, { defaultStructuredData } from "@/components/seo-optimizer"
+import CheckoutModal from "@/components/checkout-modal"
 import { allProducts, type Product } from "@/lib/products-data"
 
 // Product type is now imported from lib/products-data
@@ -98,6 +99,7 @@ export default function DopeTechEcommerce() {
   const [isAdmin, setIsAdmin] = useState(false)
   const [promoOrder, setPromoOrder] = useState<number[]>([])
   const [draggedPromoIndex, setDraggedPromoIndex] = useState<number | null>(null)
+  const [checkoutModalOpen, setCheckoutModalOpen] = useState(false)
 
   const [userBehavior, setUserBehavior] = useState({
     viewedProducts: [] as number[],
@@ -438,9 +440,7 @@ export default function DopeTechEcommerce() {
       return
     }
     
-    const total = getCartTotal()
-    alert(`Proceeding to checkout with ${cart.length} items. Total: Rs ${total.toFixed(2)}`)
-    // Here you would typically redirect to a checkout page or payment processor
+    setCheckoutModalOpen(true)
   }
 
   const filteredProducts = useMemo(() => {
@@ -1405,6 +1405,14 @@ export default function DopeTechEcommerce() {
 
       {/* AI Chat Assistant (lazy) */}
       <LazyAIChat products={products} onAddToCart={addToCart} />
+
+      {/* Checkout Modal */}
+      <CheckoutModal
+        isOpen={checkoutModalOpen}
+        onClose={() => setCheckoutModalOpen(false)}
+        cart={cart}
+        total={getCartTotal()}
+      />
     </div>
     </>
   )
