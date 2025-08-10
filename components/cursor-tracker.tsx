@@ -2,6 +2,7 @@
 
 import { useEffect } from "react"
 
+// Note: CursorTracker is now opt-in and not used by default
 export default function CursorTracker() {
   useEffect(() => {
     // Enhanced mobile detection

@@ -21,7 +21,7 @@ import {
   Smartphone,
   Monitor,
 } from "lucide-react"
-import CursorTracker from "@/components/cursor-tracker"
+// Removed CursorTracker (opt-in effect)
 import LazyAIChat from "@/components/lazy-ai-chat"
 import SEOOptimizer, { defaultStructuredData } from "@/components/seo-optimizer"
 import CheckoutModal from "@/components/checkout-modal"
@@ -713,10 +713,8 @@ export default function DopeTechEcommerce() {
 
 
   return (
-    <>
+    <div className="text-white min-h-screen transition-colors duration-100 tap-feedback scrollbar-hide gradient-bg">
       <SEOOptimizer structuredData={defaultStructuredData} />
-      <div className="text-white min-h-screen transition-colors duration-100 tap-feedback scrollbar-hide gradient-bg">
-        <CursorTracker />
       
       {/* Loading Overlay */}
       {isLoading && (
@@ -1371,7 +1369,7 @@ export default function DopeTechEcommerce() {
 
 
       {/* Jump to Categories floating button */}
-      {showBackToCategories && (
+      {showBackToCategories && !cartOpen && !checkoutModalOpen && (
         <button
           onClick={scrollToCategoryFilters}
           className="fixed right-4 md:right-6 bottom-24 md:bottom-28 z-50 flex items-center gap-2 px-4 py-3 rounded-full glass-dark border border-white/10 shadow-2xl hover:shadow-[0_12px_30px_rgba(247,221,15,0.25)] transition-all duration-200 hover:scale-105"
@@ -1403,8 +1401,10 @@ export default function DopeTechEcommerce() {
         </button>
       )}
 
-      {/* AI Chat Assistant (lazy) */}
-      <LazyAIChat products={products} onAddToCart={addToCart} />
+      {/* AI Chat Assistant (lazy) - hidden during checkout or cart open */}
+      {!checkoutModalOpen && !cartOpen && (
+        <LazyAIChat products={products} onAddToCart={addToCart} />
+      )}
 
       {/* Checkout Modal */}
       <CheckoutModal
@@ -1414,6 +1414,5 @@ export default function DopeTechEcommerce() {
         total={getCartTotal()}
       />
     </div>
-    </>
   )
 }
