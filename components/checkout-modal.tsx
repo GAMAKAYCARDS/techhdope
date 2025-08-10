@@ -45,6 +45,8 @@ export default function CheckoutModal({ isOpen, onClose, cart, total }: Checkout
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isMobile, setIsMobile] = useState(false)
   const [summaryCollapsed, setSummaryCollapsed] = useState(false)
+  const [discountExpanded, setDiscountExpanded] = useState(false)
+  const discountInputRef = useRef<HTMLInputElement>(null)
   // Manage mount/unmount for entrance/exit animations
   useEffect(() => {
     if (isOpen) {
@@ -456,6 +458,24 @@ export default function CheckoutModal({ isOpen, onClose, cart, total }: Checkout
               )}
             </div>
 
+            {/* Discount CTA (collapsed state) */}
+            {!discountExpanded && (
+              <div className="mb-3 md:mb-4">
+                <button
+                  type="button"
+                  className="text-left w-full text-[#F7DD0F] hover:underline premium-transition active:scale-95"
+                  aria-expanded={discountExpanded}
+                  onClick={() => {
+                    setDiscountExpanded(true)
+                    if (isMobile) setSummaryCollapsed(false)
+                    setTimeout(() => discountInputRef.current?.focus(), 10)
+                  }}
+                >
+                  Have a dope discount code?
+                </button>
+              </div>
+            )}
+
             {/* Condensed mobile summary */}
             {isMobile && summaryCollapsed ? (
               <div className="space-y-3 mb-4 md:mb-6 p-3 md:p-4 bg-white/5 rounded-lg border border-white/10 animate-fade-in-up">
@@ -496,24 +516,27 @@ export default function CheckoutModal({ isOpen, onClose, cart, total }: Checkout
                   ))}
                 </div>
 
-                {/* Discount Code */}
-                <div className="mb-4 md:mb-6 animate-fade-in-up">
-                  <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-                    <div className="flex-1 relative">
-                      <input
-                        type="text"
-                        value={discountCode}
-                        onChange={(e) => setDiscountCode(e.target.value)}
-                        className="w-full pl-10 pr-3 py-2 border border-white/20 rounded-lg focus:ring-2 focus:ring-[#F7DD0F] focus:border-transparent bg-white/5 text-white placeholder-gray-400 backdrop-blur-sm text-sm md:text-base transition-all duration-200"
-                        placeholder="Discount code"
-                      />
-                      <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">🏷️</span>
+                {/* Discount Code (expanded) */}
+                {discountExpanded && (
+                  <div className="mb-4 md:mb-6 animate-fade-in-up">
+                    <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
+                      <div className="flex-1 relative">
+                        <input
+                          ref={discountInputRef}
+                          type="text"
+                          value={discountCode}
+                          onChange={(e) => setDiscountCode(e.target.value)}
+                          className="w-full pl-10 pr-3 py-2 border border-white/20 rounded-lg focus:ring-2 focus:ring-[#F7DD0F] focus:border-transparent bg-white/5 text-white placeholder-gray-400 backdrop-blur-sm text-sm md:text-base transition-all duration-200"
+                          placeholder="Discount code"
+                        />
+                        <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">🏷️</span>
+                      </div>
+                      <Button className="bg-[#F7DD0F] hover:bg-[#F7DD0F]/90 text-black px-4 py-2 rounded-lg font-medium text-sm md:text-base premium-transition active:scale-95">
+                        Apply
+                      </Button>
                     </div>
-                    <Button className="bg-[#F7DD0F] hover:bg-[#F7DD0F]/90 text-black px-4 py-2 rounded-lg font-medium text-sm md:text-base premium-transition active:scale-95">
-                      Apply
-                    </Button>
                   </div>
-                </div>
+                )}
 
                 {/* Price Summary */}
                 <div className="space-y-3 mb-4 md:mb-6 p-3 md:p-4 bg-white/5 rounded-lg border border-white/10 backdrop-blur-sm animate-fade-in-up">
