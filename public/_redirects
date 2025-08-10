@@ -1,2 +1,6 @@
-# Netlify redirects for Next.js
-/*    /index.html   200 
+# Admin page redirects
+/doptechadmin /doptechadmin/index.html 200
+/doptechadmin/ /doptechadmin/index.html 200
+
+# Catch-all for SPA routing
+/* /index.html 200 

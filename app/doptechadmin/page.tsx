@@ -24,6 +24,9 @@ import {
 } from "lucide-react"
 import { allProducts, type Product } from "@/lib/products-data"
 
+
+
+
 interface AdminProduct extends Product {
   isNew?: boolean
   isEditing?: boolean
@@ -202,11 +205,17 @@ export default function DopeTechAdmin() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [adminPassword, setAdminPassword] = useState("")
   const [products, setProducts] = useState<AdminProduct[]>(allProducts)
+  const [orders, setOrders] = useState<any[]>([])
 
   // Load edited products from localStorage on component mount
   useEffect(() => {
     if (typeof window !== 'undefined') {
       try {
+        // Load orders
+        const storedOrders = localStorage.getItem('ordersV1')
+        if (storedOrders) {
+          try { setOrders(JSON.parse(storedOrders)) } catch {}
+        }
         const adminProducts = localStorage.getItem('adminProducts')
         const originalProductEdits = localStorage.getItem('originalProductEdits')
         
@@ -242,6 +251,19 @@ export default function DopeTechAdmin() {
         console.error('Error loading products from localStorage:', error)
       }
     }
+  }, [])
+
+  // Listen for new orders placed
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const handler = () => {
+      try {
+        const storedOrders = localStorage.getItem('ordersV1')
+        if (storedOrders) setOrders(JSON.parse(storedOrders))
+      } catch {}
+    }
+    window.addEventListener('orderPlaced', handler)
+    return () => window.removeEventListener('orderPlaced', handler)
   }, [])
 
   const [searchQuery, setSearchQuery] = useState("")
@@ -723,6 +745,55 @@ export default function DopeTechAdmin() {
                 <Package className="w-6 h-6 sm:w-8 sm:h-8 text-[#F7DD0F]" />
               </div>
             </div>
+          </div>
+
+          {/* Orders */}
+          <div className="lg:col-span-4 rounded-xl p-6 border border-white/10 bg-white/5">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Package className="w-5 h-5 text-[#F7DD0F]" />
+              <span>Orders</span>
+              <span className="ml-auto text-sm text-gray-400">{orders.length} total</span>
+            </h3>
+            {orders.length === 0 ? (
+              <p className="text-gray-400">No orders yet.</p>
+            ) : (
+              <div className="space-y-4 max-h-[50vh] overflow-y-auto pr-1">
+                {orders.slice().reverse().map((o) => (
+                  <div key={o.orderId} className="rounded-lg border border-white/10 bg-white/5 p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="text-sm text-gray-300">Order ID: <span className="font-semibold text-white">{o.orderId}</span></div>
+                      <div className="text-sm text-gray-300">Date: {new Date(o.timestamp).toLocaleString()}</div>
+                      <div className="text-sm text-[#F7DD0F] font-bold">Rs {o.totals.finalTotal.toLocaleString()}</div>
+                    </div>
+                    <div className="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div className="bg-white/5 rounded p-3 border border-white/10">
+                        <div className="text-xs text-gray-400 mb-1">Customer</div>
+                        <div className="text-sm text-white">{o.customer.fullName}</div>
+                        <div className="text-xs text-gray-300 break-all">{o.customer.email}</div>
+                        <div className="text-xs text-gray-300">{o.customer.phone}</div>
+                        {o.customer.fullAddress && <div className="text-xs text-gray-400 mt-1">{o.customer.fullAddress}</div>}
+                      </div>
+                      <div className="bg-white/5 rounded p-3 border border-white/10">
+                        <div className="text-xs text-gray-400 mb-1">Items</div>
+                        <ul className="text-sm text-white space-y-1 list-disc pl-4">
+                          {o.items.map((it: any) => (
+                            <li key={`${o.orderId}-${it.id}`}>{it.name} x{it.quantity} — Rs {it.price}</li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div className="bg-white/5 rounded p-3 border border-white/10">
+                        <div className="text-xs text-gray-400 mb-1">Payment</div>
+                        <div className="text-sm text-white">{o.payment.option === 'deposit' ? '10% deposit' : 'Full payment'}</div>
+                        <div className="text-sm text-[#F7DD0F]">Rs {o.payment.amount.toLocaleString()}</div>
+                        {o.receiptImage && (
+                          <a href={o.receiptImage} target="_blank" rel="noreferrer" className="inline-block mt-2 text-sm text-[#F7DD0F] underline">View receipt</a>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="rounded-xl p-4 sm:p-6 border border-white/10 bg-white/5 hover:border-green-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-green-500/10">

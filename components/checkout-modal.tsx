@@ -43,16 +43,20 @@ export default function CheckoutModal({ isOpen, onClose, cart, total }: Checkout
   const [discountCode, setDiscountCode] = useState('')
   const [termsAccepted, setTermsAccepted] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
+  const [orderId, setOrderId] = useState<string | null>(null)
   const [isMobile, setIsMobile] = useState(false)
   const [summaryCollapsed, setSummaryCollapsed] = useState(false)
   const [discountExpanded, setDiscountExpanded] = useState(false)
   const discountInputRef = useRef<HTMLInputElement>(null)
   const [selectedPaymentOption, setSelectedPaymentOption] = useState<'deposit' | 'full' | null>(null)
+  const [confirmedReceiptData, setConfirmedReceiptData] = useState<string | null>(null)
   // Manage mount/unmount for entrance/exit animations
   useEffect(() => {
     if (isOpen) {
       setShouldRender(true)
       setIsClosing(false)
+      setOrderId(null) // Reset orderId for a new checkout session
       return
     }
     setIsClosing(true)
@@ -97,22 +101,58 @@ export default function CheckoutModal({ isOpen, onClose, cart, total }: Checkout
       // For now, we'll just simulate success
       setUploadStatus('success')
       
-      // Reset after showing success
-      setTimeout(() => {
-        setUploadStatus('idle')
-        setReceiptFile(null)
-        setReceiptPreview(null)
-        if (fileInputRef.current) {
-          fileInputRef.current.value = ''
-        }
-      }, 3000)
-      
     } catch (error) {
       setUploadStatus('error')
       setTimeout(() => setUploadStatus('idle'), 3000)
     } finally {
       setIsUploading(false)
     }
+  }
+
+  const handleConfirmOrder = () => {
+    try {
+      const newOrderId = `DTP-${Math.floor(100000 + Math.random()*900000)}` // Generate new ID here
+      setOrderId(newOrderId) // Set the new ID to state for display
+      const amountDue = selectedPaymentOption === 'deposit' ? Math.max(1, Math.round(finalTotal * 0.10)) : finalTotal
+      const order = {
+        orderId: newOrderId, // Use the new ID for the saved order
+        timestamp: new Date().toISOString(),
+        deliveryOption,
+        customer: {
+          fullName: customerInfo.fullName,
+          email: customerInfo.email,
+          phone: customerInfo.phone,
+          fullAddress: customerInfo.fullAddress,
+          city: customerInfo.city,
+          state: customerInfo.state,
+          zipCode: customerInfo.zipCode,
+        },
+        items: cart,
+        totals: {
+          subtotal: total,
+          shipping: deliveryOption === 'delivery' ? 5 : 0,
+          discountCode,
+          discountAmount,
+          finalTotal,
+        },
+        payment: {
+          option: selectedPaymentOption,
+          amount: amountDue,
+        },
+        receiptImage: receiptPreview,
+      }
+
+      if (typeof window !== 'undefined') {
+        const raw = localStorage.getItem('ordersV1')
+        const list = raw ? JSON.parse(raw) : []
+        list.push(order)
+        localStorage.setItem('ordersV1', JSON.stringify(list))
+        window.dispatchEvent(new Event('orderPlaced'))
+      }
+
+      setConfirmedReceiptData(receiptPreview)
+      setActiveTab('receipt')
+    } catch {}
   }
 
   const handleRemoveFile = () => {
@@ -179,6 +219,18 @@ export default function CheckoutModal({ isOpen, onClose, cart, total }: Checkout
     setSummaryCollapsed(!isCustomerInfoValid())
   }, [isMobile, customerInfo, termsAccepted, deliveryOption])
 
+  // Ensure modal content scrolls to top when changing to payment step
+  useEffect(() => {
+    if (activeTab === 'payment' && typeof window !== 'undefined') {
+      try {
+        document.querySelectorAll('.overflow-y-auto').forEach((el) => {
+          (el as HTMLElement).scrollTop = 0
+        })
+        contentRef.current?.scrollTo?.({ top: 0 })
+      } catch {}
+    }
+  }, [activeTab])
+
   if (!shouldRender) return null
 
   return (
@@ -201,7 +253,7 @@ export default function CheckoutModal({ isOpen, onClose, cart, total }: Checkout
         <div className="flex items-center justify-between p-4 md:p-6 border-b border-white/20 bg-white/10 backdrop-blur-sm animate-slide-in-down">
           <div className="flex items-center space-x-3 md:space-x-4">
             <img src="/logo/dopelogo.svg" alt="DopeTech" className="h-6 md:h-8 w-auto" />
-            <span className="text-base md:text-lg font-semibold text-[#F7DD0F]">{selectedPaymentOption ? 'Payment' : 'Checkout'}</span>
+            <span className="text-base md:text-lg font-semibold text-[#F7DD0F]">{activeTab === 'payment' ? 'Payment' : activeTab === 'receipt' ? 'Order confirmed' : 'Checkout'}</span>
           </div>
           <button
             onClick={onClose}
@@ -212,7 +264,8 @@ export default function CheckoutModal({ isOpen, onClose, cart, total }: Checkout
         </div>
 
         {/* Content */}
-        <div className="flex flex-col lg:flex-row h-[calc(95vh-80px)]">
+        {activeTab !== 'payment' && (
+        <div ref={contentRef} className="flex flex-col lg:flex-row h-[calc(95vh-80px)]">
           {/* Left Column - Customer Information */}
           <div className="flex-1 p-6 md:p-8 border-b lg:border-b-0 lg:border-r border-white/20 overflow-y-auto animate-fade-in-up">
             
@@ -570,7 +623,7 @@ export default function CheckoutModal({ isOpen, onClose, cart, total }: Checkout
             <Button 
               className="w-full bg-[#F7DD0F] hover:bg-[#F7DD0F]/90 text-black py-3 rounded-lg font-semibold text-base md:text-lg disabled:opacity-50 disabled:cursor-not-allowed animate-scale-in premium-transition active:scale-95"
               disabled={!isCustomerInfoValid()}
-              onClick={() => setSelectedPaymentOption('deposit')}
+              onClick={() => setActiveTab('payment')}
             >
               Pay Now
             </Button>
@@ -587,10 +640,11 @@ export default function CheckoutModal({ isOpen, onClose, cart, total }: Checkout
             </div>
           </div>
         </div>
+        )}
 
         {/* Payment Step */}
-        {selectedPaymentOption && (
-          <div className="p-6 md:p-8 border-t border-white/10 bg-white/5 animate-fade-in-up">
+        {activeTab === 'payment' && (
+          <div className="p-6 md:p-8 border-t border-white/10 bg-white/5 animate-fade-in-up h-[calc(95vh-80px)] overflow-y-auto">
             <div className="max-w-3xl mx-auto space-y-6">
               <div>
                 <h2 className="text-xl md:text-2xl font-semibold text-white">Payment</h2>
@@ -620,29 +674,135 @@ export default function CheckoutModal({ isOpen, onClose, cart, total }: Checkout
               <div className="rounded-2xl border border-white/15 bg-white/5 p-5 md:p-6">
                 <h3 className="text-white font-semibold text-lg md:text-xl mb-3">Scan to pay</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-center">
-                  <div className="bg-black/40 rounded-xl p-3 border border-white/10 flex items-center justify-center">
-                    <img src="/payment/paymentqr.svg" alt="Payment QR" className="w-full h-auto max-w-xs" />
+                  <div className="bg-black/40 rounded-xl p-2 md:p-3 border border-white/10 flex items-center justify-center">
+                    <img src="/payment/paymentqr.svg" alt="Payment QR" className="w-full h-auto max-w-[180px] md:max-w-[220px]" />
                   </div>
                   <div>
                     <div className="text-gray-300 text-sm mb-2">Amount</div>
                     <div className="text-2xl font-bold text-white">Rs {(selectedPaymentOption === 'deposit' ? Math.max(1, Math.round(finalTotal*0.10)) : finalTotal).toLocaleString()}</div>
                     <p className="text-gray-400 mt-3 text-sm">After paying, please upload your receipt in the next step to confirm your order.</p>
+                    
                   </div>
                 </div>
+              </div>
+
+              {/* Upload receipt */}
+              <div className="rounded-2xl border border-white/15 bg-white/5 p-5 md:p-6 animate-fade-in-up">
+                <h3 className="text-white font-semibold text-lg md:text-xl mb-3">Upload payment receipt</h3>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+
+                {!receiptPreview ? (
+                  <div className="flex items-center justify-between gap-4 bg-white/5 border border-white/10 rounded-xl p-4">
+                    <div className="text-gray-300 text-sm">Attach a screenshot or photo of your payment</div>
+                    <button
+                      type="button"
+                      className="bg-[#F7DD0F] hover:bg-[#F7DD0F]/90 text-black px-4 py-2 rounded-lg font-semibold premium-transition active:scale-95"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      Choose image
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="bg-black/40 rounded-xl p-3 border border-white/10 flex items-center justify-center">
+                      <img src={receiptPreview} alt="Receipt preview" className="max-h-48 md:max-h-56 w-auto rounded-md" />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <button
+                        type="button"
+                        className="text-gray-300 hover:text-white premium-transition"
+                        onClick={handleRemoveFile}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Confirm button always visible */}
+                <div className="flex items-center justify-end mt-4">
+                  <Button
+                    className="bg-[#F7DD0F] hover:bg-[#F7DD0F]/90 text-black px-5 py-2.5 rounded-lg font-semibold premium-transition active:scale-95"
+                    onClick={handleUploadReceipt}
+                    disabled={!receiptPreview || !selectedPaymentOption || isUploading}
+                  >
+                    {isUploading ? 'Confirming…' : 'Confirm'}
+                  </Button>
+                </div>
+
+                {!selectedPaymentOption && (
+                  <div className="text-gray-400 text-xs mt-2">Select a payment option above to enable Confirm.</div>
+                )}
+
+                {isUploading && (
+                  <div className="flex items-center text-gray-300 text-sm mt-2">
+                    <div className="w-4 h-4 border-2 border-[#F7DD0F] border-t-transparent rounded-full animate-spin mr-2" />
+                    Uploading receipt…
+                  </div>
+                )}
+                {uploadStatus === 'success' && (
+                  <div className="flex items-center text-green-400 text-sm mt-2">
+                    <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 6L9 17l-5-5"/></svg>
+                    Receipt received. Thank you!
+                  </div>
+                )}
+                {uploadStatus === 'error' && (
+                  <div className="flex items-center text-red-400 text-sm mt-2">
+                    <svg className="w-4 h-4 mr-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12" y2="16"/></svg>
+                    Upload failed. Please try again.
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center justify-between">
                 <button
                   className="text-gray-300 hover:text-white premium-transition"
-                  onClick={() => setSelectedPaymentOption(null)}
+                  onClick={() => { setSelectedPaymentOption(null); setActiveTab('customer-info') }}
                 >
                   ← Back to checkout
                 </button>
-                <Button
-                  className="bg-[#F7DD0F] hover:bg-[#F7DD0F]/90 text-black px-5 py-2.5 rounded-lg font-semibold premium-transition active:scale-95"
-                >
-                  Continue
-                </Button>
+                {uploadStatus === 'success' && (
+                  <Button
+                    className="bg-[#F7DD0F] hover:bg-[#F7DD0F]/90 text-black px-5 py-2.5 rounded-lg font-semibold premium-transition active:scale-95"
+                    onClick={handleConfirmOrder}
+                  >
+                    Confirm Order
+                  </Button>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+        {activeTab === 'receipt' && (
+          <div className="p-6 md:p-8 border-t border-white/10 bg-white/5 animate-fade-in-up h-[calc(95vh-80px)] overflow-y-auto">
+            <div className="max-w-2xl mx-auto text-center space-y-6">
+              <div className="mx-auto w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center border border-green-400/40">
+                <svg className="w-8 h-8 text-green-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 6L9 17l-5-5"/></svg>
+              </div>
+              <h2 className="text-2xl md:text-3xl font-semibold text-white">Order confirmed</h2>
+              <p className="text-gray-300">Thank you! We’ve received your payment receipt. Your order is being processed.</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-left">
+                <div className="bg-white/5 rounded-xl border border-white/10 p-4">
+                  <div className="text-gray-400 text-sm">Order ID</div>
+                  <div className="text-white font-semibold">{orderId || 'Generating...'}</div>
+                </div>
+                <div className="bg-white/5 rounded-xl border border-white/10 p-4">
+                  <div className="text-gray-400 text-sm">Total</div>
+                  <div className="text-[#F7DD0F] font-bold">Rs {(selectedPaymentOption === 'deposit' ? Math.max(1, Math.round(finalTotal*0.10)) : finalTotal).toLocaleString()}</div>
+                </div>
+              </div>
+              <div className="space-y-2 text-sm text-gray-400">
+                <p>We’ll contact you shortly via phone to confirm delivery or pickup details.</p>
+              </div>
+              <div className="flex items-center justify-center gap-3 pt-2">
+                <Button className="bg-white/10 hover:bg-white/20 text-white px-5 py-2.5 rounded-lg" onClick={onClose}>Back to shop</Button>
+                <Button className="bg-[#F7DD0F] hover:bg-[#F7DD0F]/90 text-black px-5 py-2.5 rounded-lg" onClick={onClose}>Close</Button>
               </div>
             </div>
           </div>

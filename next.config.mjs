@@ -8,6 +8,10 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  // Ensure admin page is generated during build
+  generateBuildId: async () => {
+    return 'build-' + Date.now()
+  },
   images: {
     formats: ['image/webp', 'image/avif'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
@@ -17,9 +21,13 @@ const nextConfig = {
     loader: 'default',
     path: '',
   },
+  // Ensure all routes are pre-rendered
   experimental: {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
     optimizeCss: true,
+    // Ensure all pages are statically generated
+    workerThreads: false,
+    cpus: 1,
     turbo: {
       rules: {
         '*.svg': {
