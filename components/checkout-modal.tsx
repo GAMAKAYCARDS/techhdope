@@ -47,6 +47,7 @@ export default function CheckoutModal({ isOpen, onClose, cart, total }: Checkout
   const [summaryCollapsed, setSummaryCollapsed] = useState(false)
   const [discountExpanded, setDiscountExpanded] = useState(false)
   const discountInputRef = useRef<HTMLInputElement>(null)
+  const [selectedPaymentOption, setSelectedPaymentOption] = useState<'deposit' | 'full' | null>(null)
   // Manage mount/unmount for entrance/exit animations
   useEffect(() => {
     if (isOpen) {
@@ -161,6 +162,7 @@ export default function CheckoutModal({ isOpen, onClose, cart, total }: Checkout
   const shippingCost = deliveryOption === 'delivery' ? 5 : 0
   const discountAmount = discountCode ? 10 : 0
   const finalTotal = total + shippingCost - discountAmount
+  const depositAmount = Math.max(1, Math.round(finalTotal * 0.10))
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(typeof window !== 'undefined' && window.innerWidth < 768)
@@ -199,7 +201,7 @@ export default function CheckoutModal({ isOpen, onClose, cart, total }: Checkout
         <div className="flex items-center justify-between p-4 md:p-6 border-b border-white/20 bg-white/10 backdrop-blur-sm animate-slide-in-down">
           <div className="flex items-center space-x-3 md:space-x-4">
             <img src="/logo/dopelogo.svg" alt="DopeTech" className="h-6 md:h-8 w-auto" />
-            <span className="text-base md:text-lg font-semibold text-[#F7DD0F]">Checkout</span>
+            <span className="text-base md:text-lg font-semibold text-[#F7DD0F]">{selectedPaymentOption ? 'Payment' : 'Checkout'}</span>
           </div>
           <button
             onClick={onClose}
@@ -568,6 +570,7 @@ export default function CheckoutModal({ isOpen, onClose, cart, total }: Checkout
             <Button 
               className="w-full bg-[#F7DD0F] hover:bg-[#F7DD0F]/90 text-black py-3 rounded-lg font-semibold text-base md:text-lg disabled:opacity-50 disabled:cursor-not-allowed animate-scale-in premium-transition active:scale-95"
               disabled={!isCustomerInfoValid()}
+              onClick={() => setSelectedPaymentOption('deposit')}
             >
               Pay Now
             </Button>
@@ -584,6 +587,66 @@ export default function CheckoutModal({ isOpen, onClose, cart, total }: Checkout
             </div>
           </div>
         </div>
+
+        {/* Payment Step */}
+        {selectedPaymentOption && (
+          <div className="p-6 md:p-8 border-t border-white/10 bg-white/5 animate-fade-in-up">
+            <div className="max-w-3xl mx-auto space-y-6">
+              <div>
+                <h2 className="text-xl md:text-2xl font-semibold text-white">Payment</h2>
+                <p className="text-gray-300">Choose an option and scan the QR to pay.</p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
+                <button
+                  className={`p-5 rounded-xl border-2 backdrop-blur-sm premium-transition active:scale-95 text-left ${selectedPaymentOption === 'deposit' ? 'border-[#F7DD0F] bg-[#F7DD0F]/10' : 'border-white/20 bg-white/5 hover:border-white/40'}`}
+                  onClick={() => setSelectedPaymentOption('deposit')}
+                >
+                  <div className="text-white font-semibold text-lg md:text-xl">Pay 10% now</div>
+                  <div className="text-[#F7DD0F] font-bold text-xl md:text-2xl mt-2">Rs {Math.max(1, Math.round(finalTotal*0.10)).toLocaleString()}</div>
+                  <div className="text-gray-400 text-sm mt-1">Pay the rest on delivery</div>
+                </button>
+
+                <button
+                  className={`p-5 rounded-xl border-2 backdrop-blur-sm premium-transition active:scale-95 text-left ${selectedPaymentOption === 'full' ? 'border-[#F7DD0F] bg-[#F7DD0F]/10' : 'border-white/20 bg-white/5 hover:border-white/40'}`}
+                  onClick={() => setSelectedPaymentOption('full')}
+                >
+                  <div className="text-white font-semibold text-lg md:text-xl">Pay in full</div>
+                  <div className="text-[#F7DD0F] font-bold text-xl md:text-2xl mt-2">Rs {finalTotal.toLocaleString()}</div>
+                  <div className="text-gray-400 text-sm mt-1">Complete your order now</div>
+                </button>
+              </div>
+
+              <div className="rounded-2xl border border-white/15 bg-white/5 p-5 md:p-6">
+                <h3 className="text-white font-semibold text-lg md:text-xl mb-3">Scan to pay</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 items-center">
+                  <div className="bg-black/40 rounded-xl p-3 border border-white/10 flex items-center justify-center">
+                    <img src="/payment/paymentqr.svg" alt="Payment QR" className="w-full h-auto max-w-xs" />
+                  </div>
+                  <div>
+                    <div className="text-gray-300 text-sm mb-2">Amount</div>
+                    <div className="text-2xl font-bold text-white">Rs {(selectedPaymentOption === 'deposit' ? Math.max(1, Math.round(finalTotal*0.10)) : finalTotal).toLocaleString()}</div>
+                    <p className="text-gray-400 mt-3 text-sm">After paying, please upload your receipt in the next step to confirm your order.</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <button
+                  className="text-gray-300 hover:text-white premium-transition"
+                  onClick={() => setSelectedPaymentOption(null)}
+                >
+                  ← Back to checkout
+                </button>
+                <Button
+                  className="bg-[#F7DD0F] hover:bg-[#F7DD0F]/90 text-black px-5 py-2.5 rounded-lg font-semibold premium-transition active:scale-95"
+                >
+                  Continue
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
