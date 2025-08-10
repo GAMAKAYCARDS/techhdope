@@ -20,6 +20,9 @@ interface CheckoutModalProps {
 }
 
 export default function CheckoutModal({ isOpen, onClose, cart, total }: CheckoutModalProps) {
+  // Allow exit animations by keeping component mounted briefly after close
+  const [shouldRender, setShouldRender] = useState(isOpen)
+  const [isClosing, setIsClosing] = useState(false)
   const [activeTab, setActiveTab] = useState<'customer-info' | 'payment' | 'receipt'>('customer-info')
   const [receiptFile, setReceiptFile] = useState<File | null>(null)
   const [receiptPreview, setReceiptPreview] = useState<string | null>(null)
@@ -42,6 +45,21 @@ export default function CheckoutModal({ isOpen, onClose, cart, total }: Checkout
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [isMobile, setIsMobile] = useState(false)
   const [summaryCollapsed, setSummaryCollapsed] = useState(false)
+  // Manage mount/unmount for entrance/exit animations
+  useEffect(() => {
+    if (isOpen) {
+      setShouldRender(true)
+      setIsClosing(false)
+      return
+    }
+    setIsClosing(true)
+    const timeout = setTimeout(() => {
+      setShouldRender(false)
+      setIsClosing(false)
+    }, 220)
+    return () => clearTimeout(timeout)
+  }, [isOpen])
+
 
   // Enforce Nepal phone numbers
   const NEPAL_PHONE_REGEX = /^\+977\d{8,10}$/
@@ -157,20 +175,33 @@ export default function CheckoutModal({ isOpen, onClose, cart, total }: Checkout
     setSummaryCollapsed(!isCustomerInfoValid())
   }, [isMobile, customerInfo, termsAccepted, deliveryOption])
 
-  if (!isOpen) return null
+  if (!shouldRender) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-white/10 backdrop-blur-md rounded-2xl shadow-2xl w-full max-w-7xl max-h-[95vh] overflow-hidden border border-white/20 gradient-bg">
+    <div
+      className={[
+        "fixed inset-0 z-50 flex items-center justify-center p-4",
+        "backdrop-blur-sm transition-opacity duration-200",
+        isClosing ? "opacity-0" : "opacity-100",
+        "bg-black/50",
+      ].join(" ")}
+    >
+      <div
+        className={[
+          "bg-white/10 backdrop-blur-md rounded-2xl shadow-2xl w-full max-w-7xl max-h-[95vh] overflow-hidden border border-white/20 gradient-bg",
+          "transform-gpu transition-all duration-200",
+          isClosing ? "opacity-0 translate-y-2 scale-[0.98]" : "opacity-100 translate-y-0 scale-100",
+        ].join(" ")}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 md:p-6 border-b border-white/20 bg-white/10 backdrop-blur-sm">
+        <div className="flex items-center justify-between p-4 md:p-6 border-b border-white/20 bg-white/10 backdrop-blur-sm animate-slide-in-down">
           <div className="flex items-center space-x-3 md:space-x-4">
             <img src="/logo/dopelogo.svg" alt="DopeTech" className="h-6 md:h-8 w-auto" />
             <span className="text-base md:text-lg font-semibold text-[#F7DD0F]">Checkout</span>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-white/10 rounded-full transition-colors text-white"
+            className="p-2 hover:bg-white/10 rounded-full transition-colors text-white active:scale-95 premium-transition"
           >
             <X className="w-4 h-4 md:w-5 md:h-5" />
           </button>
@@ -179,7 +210,7 @@ export default function CheckoutModal({ isOpen, onClose, cart, total }: Checkout
         {/* Content */}
         <div className="flex flex-col lg:flex-row h-[calc(95vh-80px)]">
           {/* Left Column - Customer Information */}
-          <div className="flex-1 p-6 md:p-8 border-b lg:border-b-0 lg:border-r border-white/20 overflow-y-auto">
+          <div className="flex-1 p-6 md:p-8 border-b lg:border-b-0 lg:border-r border-white/20 overflow-y-auto animate-fade-in-up">
             
             <div className="space-y-6 md:space-y-8">
               {/* Delivery Options */}
@@ -188,7 +219,7 @@ export default function CheckoutModal({ isOpen, onClose, cart, total }: Checkout
                 <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 mb-6 md:mb-8">
                   <button
                     onClick={() => setDeliveryOption('delivery')}
-                    className={`flex items-center justify-center sm:justify-start space-x-3 px-6 py-4 rounded-lg border-2 transition-colors backdrop-blur-sm ${
+                    className={`flex items-center justify-center sm:justify-start space-x-3 px-6 py-4 rounded-lg border-2 transition-colors transform-gpu active:scale-95 premium-transition backdrop-blur-sm ${
                       deliveryOption === 'delivery'
                         ? 'border-[#F7DD0F] bg-[#F7DD0F]/20 text-[#F7DD0F]'
                         : 'border-white/30 bg-white/5 text-gray-300 hover:border-white/50 hover:text-white'
@@ -199,7 +230,7 @@ export default function CheckoutModal({ isOpen, onClose, cart, total }: Checkout
                   </button>
                   <button
                     onClick={() => setDeliveryOption('pickup')}
-                    className={`flex items-center justify-center sm:justify-start space-x-3 px-6 py-4 rounded-lg border-2 transition-colors backdrop-blur-sm ${
+                    className={`flex items-center justify-center sm:justify-start space-x-3 px-6 py-4 rounded-lg border-2 transition-colors transform-gpu active:scale-95 premium-transition backdrop-blur-sm ${
                       deliveryOption === 'pickup'
                         ? 'border-[#F7DD0F] bg-[#F7DD0F]/20 text-[#F7DD0F]'
                         : 'border-white/30 bg-white/5 text-gray-300 hover:border-white/50 hover:text-white'
@@ -213,7 +244,7 @@ export default function CheckoutModal({ isOpen, onClose, cart, total }: Checkout
                 {/* Form Fields */}
                 {deliveryOption === 'pickup' ? (
                   <div className="space-y-6">
-                    <div>
+                    <div className="animate-fade-in-up stagger-2">
                       <label htmlFor="fullName" className="block text-base font-medium text-gray-300 mb-2">
                         Full name *
                       </label>
@@ -228,7 +259,7 @@ export default function CheckoutModal({ isOpen, onClose, cart, total }: Checkout
                       />
                     </div>
 
-                    <div>
+                    <div className="animate-fade-in-up stagger-3">
                       <label htmlFor="phone" className="block text-base font-medium text-gray-300 mb-2">
                         Phone number (Nepal only) *
                       </label>
@@ -253,7 +284,7 @@ export default function CheckoutModal({ isOpen, onClose, cart, total }: Checkout
                     </div>
 
                     {/* Pickup location map */}
-                    <div>
+                    <div className="animate-fade-in-up stagger-2">
                       <label className="block text-base font-medium text-gray-300 mb-2">Pickup Location</label>
                       <div className="rounded-lg overflow-hidden border border-white/20 bg-white/5">
                         <iframe
@@ -271,7 +302,7 @@ export default function CheckoutModal({ isOpen, onClose, cart, total }: Checkout
                   </div>
                 ) : (
                   <>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 animate-fade-in-up">
                       <div className="md:col-span-2">
                         <label htmlFor="fullName" className="block text-base font-medium text-gray-300 mb-2">
                           Full name *
@@ -372,7 +403,7 @@ export default function CheckoutModal({ isOpen, onClose, cart, total }: Checkout
                     </div>
 
                     {/* Full Address */}
-                    <div className="mt-6 md:mt-8">
+                    <div className="mt-6 md:mt-8 animate-fade-in-up stagger-3">
                       <label htmlFor="fullAddress" className="block text-base font-medium text-gray-300 mb-2">
                         Full Address *
                       </label>
@@ -388,7 +419,7 @@ export default function CheckoutModal({ isOpen, onClose, cart, total }: Checkout
                     </div>
 
                     {/* Terms and Conditions */}
-                    <div className="mt-6 md:mt-8">
+                    <div className="mt-6 md:mt-8 animate-fade-in-up stagger-4">
                       <label className="flex items-start space-x-4">
                         <input
                           type="checkbox"
@@ -408,12 +439,12 @@ export default function CheckoutModal({ isOpen, onClose, cart, total }: Checkout
           </div>
 
           {/* Right Column - Order Summary */}
-          <div className="w-full lg:w-96 p-4 md:p-6 bg-white/5 backdrop-blur-sm border-t lg:border-t-0 lg:border-l border-white/20 overflow-y-auto">
+          <div className="w-full lg:w-96 p-4 md:p-6 bg-white/5 backdrop-blur-sm border-t lg:border-t-0 lg:border-l border-white/20 overflow-y-auto animate-slide-in-down">
             <div className="flex items-center justify-between mb-4 md:mb-6">
               <h2 className="text-base md:text-lg font-semibold text-white">Review your cart</h2>
               {isMobile && (
                 <button
-                  className="inline-flex items-center text-sm text-[#F7DD0F]"
+                  className="inline-flex items-center text-sm text-[#F7DD0F] premium-transition active:scale-95"
                   onClick={() => setSummaryCollapsed(!summaryCollapsed)}
                 >
                   {summaryCollapsed ? (
@@ -427,7 +458,7 @@ export default function CheckoutModal({ isOpen, onClose, cart, total }: Checkout
 
             {/* Condensed mobile summary */}
             {isMobile && summaryCollapsed ? (
-              <div className="space-y-3 mb-4 md:mb-6 p-3 md:p-4 bg-white/5 rounded-lg border border-white/10">
+              <div className="space-y-3 mb-4 md:mb-6 p-3 md:p-4 bg-white/5 rounded-lg border border-white/10 animate-fade-in-up">
                 <div className="flex justify-between">
                   <span className="text-gray-300 text-sm">Subtotal</span>
                   <span className="font-medium text-white text-sm">Rs {total.toLocaleString()}</span>
@@ -442,7 +473,7 @@ export default function CheckoutModal({ isOpen, onClose, cart, total }: Checkout
                     <span className="font-medium text-red-400 text-sm">-Rs {discountAmount.toLocaleString()}</span>
                   </div>
                 )}
-                <div className="border-t border-white/20 pt-3">
+                 <div className="border-t border-white/20 pt-3">
                   <div className="flex justify-between">
                     <span className="text-base font-semibold text-white">Total</span>
                     <span className="text-base font-bold text-[#F7DD0F]">Rs {finalTotal.toLocaleString()}</span>
@@ -466,26 +497,26 @@ export default function CheckoutModal({ isOpen, onClose, cart, total }: Checkout
                 </div>
 
                 {/* Discount Code */}
-                <div className="mb-4 md:mb-6">
+                <div className="mb-4 md:mb-6 animate-fade-in-up">
                   <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
                     <div className="flex-1 relative">
                       <input
                         type="text"
                         value={discountCode}
                         onChange={(e) => setDiscountCode(e.target.value)}
-                        className="w-full pl-10 pr-3 py-2 border border-white/20 rounded-lg focus:ring-2 focus:ring-[#F7DD0F] focus:border-transparent bg-white/5 text-white placeholder-gray-400 backdrop-blur-sm text-sm md:text-base"
+                        className="w-full pl-10 pr-3 py-2 border border-white/20 rounded-lg focus:ring-2 focus:ring-[#F7DD0F] focus:border-transparent bg-white/5 text-white placeholder-gray-400 backdrop-blur-sm text-sm md:text-base transition-all duration-200"
                         placeholder="Discount code"
                       />
                       <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">🏷️</span>
                     </div>
-                    <Button className="bg-[#F7DD0F] hover:bg-[#F7DD0F]/90 text-black px-4 py-2 rounded-lg font-medium text-sm md:text-base">
+                    <Button className="bg-[#F7DD0F] hover:bg-[#F7DD0F]/90 text-black px-4 py-2 rounded-lg font-medium text-sm md:text-base premium-transition active:scale-95">
                       Apply
                     </Button>
                   </div>
                 </div>
 
                 {/* Price Summary */}
-                <div className="space-y-3 mb-4 md:mb-6 p-3 md:p-4 bg-white/5 rounded-lg border border-white/10 backdrop-blur-sm">
+                <div className="space-y-3 mb-4 md:mb-6 p-3 md:p-4 bg-white/5 rounded-lg border border-white/10 backdrop-blur-sm animate-fade-in-up">
                   <div className="flex justify-between">
                     <span className="text-gray-300 text-sm md:text-base">Subtotal</span>
                     <span className="font-medium text-white text-sm md:text-base">Rs {total.toLocaleString()}</span>
@@ -512,14 +543,14 @@ export default function CheckoutModal({ isOpen, onClose, cart, total }: Checkout
 
             {/* Pay Now Button */}
             <Button 
-              className="w-full bg-[#F7DD0F] hover:bg-[#F7DD0F]/90 text-black py-3 rounded-lg font-semibold text-base md:text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-[#F7DD0F] hover:bg-[#F7DD0F]/90 text-black py-3 rounded-lg font-semibold text-base md:text-lg disabled:opacity-50 disabled:cursor-not-allowed animate-scale-in premium-transition active:scale-95"
               disabled={!isCustomerInfoValid()}
             >
               Pay Now
             </Button>
 
             {/* Security Message */}
-            <div className="mt-4 text-center p-3 bg-white/5 rounded-lg border border-white/10 backdrop-blur-sm">
+            <div className="mt-4 text-center p-3 bg-white/5 rounded-lg border border-white/10 backdrop-blur-sm animate-fade-in-up">
               <div className="flex items-center justify-center space-x-2 mb-2">
                 <Lock className="w-4 h-4 text-[#F7DD0F]" />
                 <span className="text-sm font-medium text-white">Secure Checkout - SSL Encrypted</span>
